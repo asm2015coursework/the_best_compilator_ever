@@ -15,4 +15,12 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    preprocessor.cpp \
+    parser.cpp \
+    code_generator.cpp
+
+HEADERS += \
+    preprocessor.h \
+    parser.h \
+    code_generator.h
