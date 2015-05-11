@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-class code_generator
+class CodeGenerator
 {
 public:
-    code_generator();
+    CodeGenerator();
     static std::string generate(std::vector<std::string>);
 };
 

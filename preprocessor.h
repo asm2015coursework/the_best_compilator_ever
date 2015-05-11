@@ -3,10 +3,10 @@
 
 #include <string>
 
-class preprocessor
+class Preprocessor
 {
 public:
-    preprocessor();
+    Preprocessor();
     static std::string preprocess(std::string file_name);
 };
 

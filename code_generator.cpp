@@ -1,9 +1,9 @@
 #include "code_generator.h"
 
-code_generator::code_generator()
+CodeGenerator::CodeGenerator()
 {
 }
 
-std::string code_generator::generate(std::vector<std::string>) {
+std::string CodeGenerator::generate(std::vector<std::string> code) {
     return "";
 }

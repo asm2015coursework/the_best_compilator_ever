@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-class parser
+class Parser
 {
 public:
-    parser();
+    Parser();
     static std::vector<std::string> parse(std::string code);
 };
 

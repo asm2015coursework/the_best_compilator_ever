@@ -1,9 +1,9 @@
 #include "preprocessor.h"
 
-preprocessor::preprocessor()
+Preprocessor::Preprocessor()
 {
 }
 
-std::string preprocessor::preprocess(std::string file_name) {
+std::string Preprocessor::preprocess(std::string file_name) {
     return "";
 }
