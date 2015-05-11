@@ -16,11 +16,11 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    code_generator.cpp \
-    parser.cpp \
-    preprocessor.cpp
+    CodeGenerator.cpp \
+    Parser.cpp \
+    Preprocessor.cpp
 
 HEADERS += \
-    code_generator.h \
-    parser.h \
-    preprocessor.h
+    CodeGenerator.h \
+    Parser.h \
+    Preprocessor.h

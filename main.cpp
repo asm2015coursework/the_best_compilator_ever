@@ -2,9 +2,9 @@
 #include <string>
 #include <cstring>
 #include <iostream>
-#include "preprocessor.h"
-#include "parser.h"
-#include "code_generator.h"
+#include "Preprocessor.h"
+#include "Parser.h"
+#include "CodeGenerator.h"
 
 int main(int argc, char *argv[]) {
     if (!(argc == 2 || (argc == 4 && strcmp(argv[2], "-o") == 0))) {
