@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     }
 /*
     std::string code = Preprocessor::preprocess(argv[0]);
-    std::vector<Token> parsed_code = (new Parser)->parse(code);
+    std::vector<Token*> parsed_code = (new Parser)->parse(code); //don't do like that!!!
     std::string asm_code = CodeGenerator::generate(parsed_code);
 
     printf("Compiled to %s \n", output_file.data());
