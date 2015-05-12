@@ -1,10 +1,14 @@
 #ifndef RESULT_H
 #define RESULT_H
 
-class Result
-{
+#include <tokens/Token.h>
+
+class Result {
 public:
-    Result();
+    Result(Token *acc, size_t rest);
+
+    Token *acc;
+    size_t rest;
 };
 
 #endif // RESULT_H

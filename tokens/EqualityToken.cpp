@@ -1,5 +1,10 @@
-#include "ExpressionToken.h"
+#include "EqualityToken.h"
 
-ExpressionToken::ExpressionToken()
-{
+EqualityToken::EqualityToken(Token *left, Token *right) {
+    this->left = left;
+    this->right = right;
+}
+
+string EqualityToken::toString() {
+    return "(" + left->toString() + "=" + right->toString() + ")";
 }
