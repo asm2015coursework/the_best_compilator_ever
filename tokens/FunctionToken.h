@@ -7,14 +7,14 @@
 
 class FunctionToken : public Token {
 public:
-    FunctionToken(string type, string name, vector<Variable> args, vector<Token*> body);
+    FunctionToken(string type, string name, vector<Variable> args, Token* body);
 
     virtual string toString();
 
     string _type;
     string _name;
     vector<Variable> _args;
-    vector<Token*> _body;
+    Token* _body;
 };
 
 #endif // FUNCTIONTOKEN_H

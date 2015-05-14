@@ -8,6 +8,6 @@ InitializationToken::InitializationToken(string type, string name, Token *expr) 
 
 string InitializationToken::toString() {
     string ans = _type + " " + _name;
-    if (_expr != nullptr) ans += _expr->toString();
+    if (_expr != nullptr) ans += _expr->toString(); else ans += ";\n";
     return ans;
 }

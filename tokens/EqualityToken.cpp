@@ -6,5 +6,5 @@ EqualityToken::EqualityToken(Token *left, Token *right) {
 }
 
 string EqualityToken::toString() {
-    return "(" + left->toString() + "=" + right->toString() + ")";
+    return "(" + left->toString() + "==" + right->toString() + ")";
 }

@@ -22,10 +22,18 @@ SOURCES += main.cpp \
     Variable.cpp \
     tokens/FunctionToken.cpp \
     parser/Parser.cpp \
-    parser/Result.cpp \
     tokens/EqualityToken.cpp \
     tokens/VariableToken.cpp \
-    tokens/InitializationToken.cpp
+    tokens/InitializationToken.cpp \
+    tokens/ForToken.cpp \
+    tokens/AddToken.cpp \
+    tokens/SubtractToken.cpp \
+    tokens/MultiplyToken.cpp \
+    tokens/DivideToken.cpp \
+    tokens/ConstToken.cpp \
+    tokens/BlockToken.cpp \
+    tokens/AssignmentToken.cpp \
+    tokens/OrToken.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -33,9 +41,17 @@ HEADERS += \
     tokens/FunctionToken.h \
     tokens/Token.h \
     parser/Parser.h \
-    parser/Result.h \
     parser/ParsingException.h \
     tokens/EqualityToken.h \
     tokens/VariableToken.h \
     tokens/InitializationToken.h \
-    Variable.h
+    Variable.h \
+    tokens/ForToken.h \
+    tokens/AddToken.h \
+    tokens/SubtractToken.h \
+    tokens/MultiplyToken.h \
+    tokens/DivideToken.h \
+    tokens/ConstToken.h \
+    tokens/BlockToken.h \
+    tokens/AssignmentToken.h \
+    tokens/OrToken.h

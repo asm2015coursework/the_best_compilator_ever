@@ -1,10 +1,18 @@
 #ifndef BLOCKTOKEN_H
 #define BLOCKTOKEN_H
 
-class BlockToken
-{
+#include <vector>
+#include <string>
+#include "Token.h"
+#include "Variable.h"
+
+class BlockToken : public Token {
 public:
-    BlockToken();
+    BlockToken(vector<Token*> commands);
+
+    virtual string toString();
+
+    vector<Token*> _commands;
 };
 
 #endif // BLOCKTOKEN_H
