@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
     freopen(output_file.data(), "w", stdout);
     std::cout << asm_code;
 */
-
-    vector<Token*> ans = (new Parser)->parse("long f(long x, string chlen) {\n}\nchar character;\n int main() {\nlong lol;{int c; char kek;}\n}");
+    Parser p;
+    vector<Token*> ans = p.parse("long f(long x, string chlen) {\n}\nchar character;\n int main() {\nlong lol;{int c; char kek;}\n}");
     for (size_t i = 0; i < ans.size(); i++) {
         std::cout << ans[i]->toString();
     }

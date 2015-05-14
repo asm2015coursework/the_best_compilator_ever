@@ -57,7 +57,7 @@ vector<Token*> Parser::parse(string code) {
             if (x >= str.length()) throw ParsingException("unexpected end of file");
             if (str[x] != ';') throw ParsingException("; expected (symbol " + std::string(1, str[x]) + " " + std::to_string(x) + ")");
             x++;
-            while (x < str.length() && isspace(str[x])) x++;
+            while (x < str.length() && isspace(str[x])) x++;            
             ans.push_back(new InitializationToken(type, name, nullptr));
         }
     }
