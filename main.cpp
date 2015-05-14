@@ -30,7 +30,12 @@ int main(int argc, char *argv[]) {
     std::cout << asm_code;
 */
     Parser p;
-    vector<Token*> ans = p.parse("long f(long x, string chlen) {\n}\nchar character;\n int main() {\nlong lol;{int c; char kek;}\n}");
+    vector<Token*> ans = p.parse("long f(long x, int y) {\n"
+                                 "}\n"
+                                 "char character;\n"
+                                 "int main() {\n"
+                                 "long lol;{int c; char kek;}\n"
+                                 "}");
     for (size_t i = 0; i < ans.size(); i++) {
         std::cout << ans[i]->toString();
     }
