@@ -30,10 +30,16 @@ SOURCES += main.cpp \
     tokens/SubtractToken.cpp \
     tokens/MultiplyToken.cpp \
     tokens/DivideToken.cpp \
-    tokens/ConstToken.cpp \
     tokens/BlockToken.cpp \
     tokens/AssignmentToken.cpp \
-    tokens/OrToken.cpp
+    tokens/OrToken.cpp \
+    tokens/ConstIntToken.cpp \
+    tokens/AndToken.cpp \
+    tokens/DereferenceToken.cpp \
+    tokens/AddressToken.cpp \
+    tokens/UnaryMinusToken.cpp \
+    tokens/UnaryPlusToken.cpp \
+    tokens/ReturnToken.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -51,7 +57,13 @@ HEADERS += \
     tokens/SubtractToken.h \
     tokens/MultiplyToken.h \
     tokens/DivideToken.h \
-    tokens/ConstToken.h \
     tokens/BlockToken.h \
     tokens/AssignmentToken.h \
-    tokens/OrToken.h
+    tokens/OrToken.h \
+    tokens/ConstIntToken.h \
+    tokens/AndToken.h \
+    tokens/DereferenceToken.h \
+    tokens/AddressToken.h \
+    tokens/UnaryMinusToken.h \
+    tokens/UnaryPlusToken.h \
+    tokens/ReturnToken.h

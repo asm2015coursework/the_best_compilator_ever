@@ -15,12 +15,10 @@ vector<Token*> Parser::parse(string code) {
         while (x < str.length() && isspace(str[x])) x++;
         pair<string, int> p = nameParse(x);
         string type = p.first;
-        x = p.second;
-        while (x < str.length() && isspace(str[x])) x++;
+        x = p.second;        
         p = nameParse(x);
         string name = p.first;
-        x = p.second;
-        while (x < str.length() && isspace(str[x])) x++;
+        x = p.second;        
 
         if (x < str.length() && str[x] == '(') {
             //FunctionToken
@@ -31,12 +29,10 @@ vector<Token*> Parser::parse(string code) {
                 while (x < str.length() && isspace(str[x])) x++;
                 p = nameParse(x);
                 string type = p.first;
-                x = p.second;
-                while (x < str.length() && isspace(str[x])) x++;
+                x = p.second;                
                 p = nameParse(x);
                 string name = p.first;
-                x = p.second;
-                while (x < str.length() && isspace(str[x])) x++;
+                x = p.second;                
                 Variable v(type, name);
                 args.push_back(v);
                 if (x >= str.length()) break;
@@ -72,46 +68,207 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
         pair<string, int> p = nameParse(x);
         string name = p.first;
         size_t y = p.second;
-        if (y >= str.length()) throw ParsingException("unexpected end of file");
-        while (y < str.length() && isspace(str[y])) y++;
-        if (nameFirstSymbol(str[y])) {
+        if (y >= str.length()) throw ParsingException("unexpected end of file");        
+        if (name == "if") {
+            //IfToken
+
+        } else if (name == "for") {
+            //ForToken
+
+        } else if (name == "while") {
+            //WhileToken
+
+        } else if (name == "return") {
+            //ReturnToken
+            x += 6;
+            while (x < str.length() && isspace(str[x])) x++;
+            pair<Token*, size_t> p = expressionParse(x);
+            x = p.second;
+            if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            return make_pair(new ReturnToken(p.first), x);
+        } else if (nameFirstSymbol(str[y])) {
             //InititalizationToken
             pair<string, int> p = nameParse(y);
             y = p.second;
-            while (y < str.length() && isspace(str[y])) y++;
-            if (str[y] != ';') throw ParsingException("; expected (symbol " + std::string(1, str[y]) + " " + std::to_string(y) + ")");
+            if (str[y] != ';') throw ParsingException(y, ';', str[y]);
             y++;
             while (y < str.length() && isspace(str[y])) y++;
             return make_pair(new InitializationToken(name, p.first, nullptr), y);
         } else {
             //Expression
-            return expressionParse(x);
+            pair<Token*, size_t> p = expressionParse(x);
+            x = p.second;
+            if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            return make_pair(p.first, x);
         }
     } else {
-        //???
-    }    
+        //Expression
+        pair<Token*, size_t> p = expressionParse(x);
+        x = p.second;
+        if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        return make_pair(p.first, x);
+    }
 }
 
 pair<Token*, size_t> Parser::expressionParse(size_t x) {
     // AssignmentToken
-    pair<Token*, size_t> cur1 = LexemParse(x);
+    pair<Token*, size_t> cur1 = orParse(x);
+    x = cur1.second;
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && str[x] == '=') {
+        char oprtn = str[x];
+        if (oprtn != '=') throw ParsingException(x, '=', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> cur2 = expressionParse(x);
+        x = cur2.second;
+        cur1.first = new AssignmentToken(cur1.first, cur2.first);
+    }
+    return make_pair(cur1.first, x);
 }
 
-pair<Token*, size_t> Parser::LexemParse(size_t x) {
+pair<Token*, size_t> Parser::orParse(size_t x) {
+    //OrToken
+    pair<Token*, size_t> cur1 = andParse(x);
+    x = cur1.second;
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && str[x] == '|') {
+        char oprtn = str[x];
+        if (oprtn != '|') throw ParsingException(x, '|', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> cur2 = andParse(x);
+        x = cur2.second;
+        cur1.first = new OrToken(cur1.first, cur2.first);
+    }
+    return make_pair(cur1.first, x);
+}
 
+pair<Token*, size_t> Parser::andParse(size_t x) {
+    //AndToken
+    pair<Token*, size_t> cur1 = addSubtractParse(x);
+    x = cur1.second;
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && str[x] == '&') {
+        char oprtn = str[x];
+        if (oprtn != '&') throw ParsingException(x, '&', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> cur2 = addSubtractParse(x);
+        x = cur2.second;
+        cur1.first = new AndToken(cur1.first, cur2.first);
+    }
+    return make_pair(cur1.first, x);
+}
+
+pair<Token*, size_t> Parser::addSubtractParse(size_t x) {
+    //AddToken or SubtractToken
+    pair<Token*, size_t> cur1 = multiplyDivideParse(x);
+    x = cur1.second;
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && (str[x] == '+' || str[x] == '-')) {
+        char oprtn = str[x];
+        if (oprtn != '+' && oprtn != '-') throw ParsingException(x, '+', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> cur2 = multiplyDivideParse(x);
+        x = cur2.second;
+        if (oprtn == '+') {
+            cur1.first = new AddToken(cur1.first, cur2.first);
+        } else { //oprtn == '-'
+            cur1.first = new SubtractToken(cur1.first, cur2.first);
+        }
+    }
+    return make_pair(cur1.first, x);
+}
+
+pair<Token*, size_t> Parser::multiplyDivideParse(size_t x) {
+    //MultiplyToken or DivideToken
+    pair<Token*, size_t> cur1 = unaryParse(x);
+    x = cur1.second;
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && (str[x] == '*' || str[x] == '/')) {
+        char oprtn = str[x];
+        if (oprtn != '*' && oprtn != '/') throw ParsingException(x, '*', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> cur2 = unaryParse(x);
+        x = cur2.second;
+        if (oprtn == '*') {
+            cur1.first = new MultiplyToken(cur1.first, cur2.first);
+        } else { //oprtn == '/'
+            cur1.first = new DivideToken(cur1.first, cur2.first);
+        }
+    }
+    return make_pair(cur1.first, x);
+}
+
+pair<Token*, size_t> Parser::unaryParse(size_t x) {
+    if (str[x] == '*') {
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = unaryParse(x);
+        return make_pair(new DereferenceToken(p.first), p.second);
+    } else if (str[x] == '&') {
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = unaryParse(x);
+        return make_pair(new AddressToken(p.first), p.second);
+    } else if (str[x] == '-') {
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = unaryParse(x);
+        return make_pair(new UnaryMinusToken(p.first), p.second);
+    } else if (str[x] == '+') {
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = unaryParse(x);
+        return make_pair(new UnaryPlusToken(p.first), p.second);
+    } else if (nameFirstSymbol(str[x])){
+        return variableParse(x);
+    } else if (str[x] >= '0' && str[x] <= '9') {
+        return constParse(x);
+    } else { // brackets
+        if (str[x] != '(') throw ParsingException(x, '(', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = expressionParse(x);
+        x = p.second;
+        if (str[x] != ')') throw ParsingException(x, ')', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        return make_pair(p.first, x);
+    }
+}
+
+pair<Token*, size_t> Parser::constParse(size_t x) {
+    string f = "";
+    while (str[x] >= '0' && str[x] <= '9') {
+        f += str[x];
+        x++;
+    }
+    while (x < str.length() && isspace(str[x])) x++;
+    int v = std::stoi(f);
+    return make_pair(new ConstIntToken(v), x);
+}
+
+pair<Token*, size_t> Parser::variableParse(size_t x) {
+    //VariableToken or ReturnToken
+    pair<string, size_t> p = nameParse(x);    
+    return make_pair(new VariableToken(p.first), p.second);
 }
 
 pair<Token*, size_t> Parser::blockParse(size_t x) {
     // { }
-    if (str[x] != '{') throw ParsingException("{ expected (symbol " + std::string(1, str[x]) + " " + std::to_string(x) + ")");
+    if (str[x] != '{') throw ParsingException(x, '{', str[x]);
     x++;
     while (x < str.length() && isspace(str[x])) x++;
     vector<Token*> ans;
     while (x < str.length() && str[x] != '}') {
         pair<Token*, size_t> res;
         if (str[x] == '{') res = blockParse(x); else res = commandParse(x);
-        x = res.second;
-        while (x < str.length() && isspace(str[x])) x++;
+        x = res.second;        
         ans.push_back(res.first);
     }
     x++;
@@ -119,8 +276,8 @@ pair<Token*, size_t> Parser::blockParse(size_t x) {
     return make_pair(new BlockToken(ans), x);
 }
 
-pair<string, int> Parser::nameParse(size_t x) {    
-    if (!nameFirstSymbol(str[x])) throw ParsingException("incorrect name (symbol " + std::string(1, str[x]) + " " + std::to_string(x) + ")");
+pair<string, size_t> Parser::nameParse(size_t x) {
+    if (!nameFirstSymbol(str[x])) throw ParsingException("incorrect name (found symbol '" + std::string(1, str[x]) + "' at " + std::to_string(x) + ")");
     string f(1, str[x]);
     size_t i = x + 1;
 
@@ -128,6 +285,8 @@ pair<string, int> Parser::nameParse(size_t x) {
         f += str[i];
         i++;
     }
+
+    while (i < str.length() && isspace(str[i])) i++;
 
     return make_pair(f, i);
 }

@@ -6,5 +6,5 @@ MultiplyToken::MultiplyToken(Token *left, Token *right) {
 }
 
 string MultiplyToken::toString() {
-    return "(" + left->toString() + "+" + right->toString() + ")";
+    return "(" + left->toString() + "*" + right->toString() + ")";
 }
