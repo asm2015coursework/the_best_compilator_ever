@@ -40,7 +40,8 @@ SOURCES += main.cpp \
     tokens/UnaryMinusToken.cpp \
     tokens/UnaryPlusToken.cpp \
     tokens/ReturnToken.cpp \
-    tokens/IfToken.cpp
+    tokens/IfToken.cpp \
+    lib/Utils.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -68,4 +69,5 @@ HEADERS += \
     tokens/UnaryMinusToken.h \
     tokens/UnaryPlusToken.h \
     tokens/ReturnToken.h \
-    tokens/IfToken.h
+    tokens/IfToken.h \
+    lib/Utils.h

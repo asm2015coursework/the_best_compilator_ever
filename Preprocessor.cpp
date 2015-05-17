@@ -5,5 +5,5 @@ Preprocessor::Preprocessor()
 }
 
 std::string Preprocessor::preprocess(std::string file_name) {
-    return "";
+    return FileToString(file_name);
 }

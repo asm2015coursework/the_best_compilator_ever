@@ -1,13 +1,13 @@
 #ifndef PREPROCESSOR_H
 #define PREPROCESSOR_H
 
-#include <string>
+#include "lib/Utils.h"
 
 class Preprocessor
 {
 public:
     Preprocessor();
-    static std::string preprocess(std::string file_name);
+    static string preprocess(string file_name);
 };
 
 #endif // PREPROCESSOR_H
