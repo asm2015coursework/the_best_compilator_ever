@@ -18,3 +18,7 @@ string FunctionToken::toString() {
     ans += _body->toString();
     return ans;
 }
+
+string FunctionToken::getType() {
+    return "Function";
+}

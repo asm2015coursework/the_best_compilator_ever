@@ -7,3 +7,7 @@ VariableToken::VariableToken(string name) {
 string VariableToken::toString() {
     return _name;
 }
+
+string VariableToken::getType() {
+    return "Variable";
+}

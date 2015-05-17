@@ -10,6 +10,7 @@ public:
     FunctionToken(string type, string name, vector<Variable> args, Token* body);
 
     virtual string toString();
+    virtual string getType();
 
     string _type;
     string _name;

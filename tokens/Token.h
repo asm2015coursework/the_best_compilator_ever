@@ -10,6 +10,7 @@ using std::vector;
 class Token {
 public:        
     virtual string toString() = 0; // for testing
+    virtual string getType() = 0;
 };
 
 #endif // TOKEN_H

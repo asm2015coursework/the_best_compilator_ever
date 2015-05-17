@@ -36,6 +36,12 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < ans.size(); i++) {
         std::cout << ans[i]->toString() + ";\n";
     }
+    std::cout << std::endl;
+
+    for (size_t i = 0; i < ans.size(); i++) {
+        std::cout << ans[i]->getType() + ";\n";
+    }
+    std::cout << std::endl;
 
     return 0;
 }

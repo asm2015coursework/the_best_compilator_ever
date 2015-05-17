@@ -8,3 +8,7 @@ string ReturnToken::toString() {
     if (expr == nullptr) return "return";
         else return "return " + expr->toString();
 }
+
+string ReturnToken::getType() {
+    return "Return";
+}

@@ -8,6 +8,7 @@ public:
     VariableToken(string name);
 
     virtual string toString();
+    virtual string getType();
 
     string _name;
 };

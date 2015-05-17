@@ -8,6 +8,7 @@ public:
     SubtractToken(Token* left, Token* right);
 
     virtual string toString();
+    virtual string getType();
 
     Token *left;
     Token *right;

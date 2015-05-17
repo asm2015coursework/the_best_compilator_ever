@@ -11,3 +11,7 @@ string InitializationToken::toString() {
     if (_expr != nullptr) ans += _expr->toString(); else ans += "";
     return ans;
 }
+
+string InitializationToken::getType() {
+    return "Initialization";
+}

@@ -8,3 +8,7 @@ MultiplyToken::MultiplyToken(Token *left, Token *right) {
 string MultiplyToken::toString() {
     return "(" + left->toString() + "*" + right->toString() + ")";
 }
+
+string MultiplyToken::getType() {
+    return "Multiply";
+}

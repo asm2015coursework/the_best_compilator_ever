@@ -8,3 +8,7 @@ AssignmentToken::AssignmentToken(Token *left, Token *right) {
 string AssignmentToken::toString() {
     return "(" + left->toString() + "=" + right->toString() + ")";
 }
+
+string AssignmentToken::getType() {
+    return "Assignment";
+}

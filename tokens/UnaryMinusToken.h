@@ -8,6 +8,7 @@ public:
     UnaryMinusToken(Token *expr);
 
     virtual string toString();
+    virtual string getType();
 
     Token* expr;
 };

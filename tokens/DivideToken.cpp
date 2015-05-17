@@ -8,3 +8,7 @@ DivideToken::DivideToken(Token *left, Token *right) {
 string DivideToken::toString() {
     return "(" + left->toString() + "/" + right->toString() + ")";
 }
+
+string DivideToken::getType() {
+    return "Divide";
+}

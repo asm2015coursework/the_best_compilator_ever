@@ -8,3 +8,7 @@ AddToken::AddToken(Token *left, Token *right) {
 string AddToken::toString() {
     return "(" + left->toString() + "+" + right->toString() + ")";
 }
+
+string AddToken::getType() {
+    return "Add";
+}

@@ -8,3 +8,6 @@ string UnaryPlusToken::toString() {
     return "(+" + expr->toString() + ")";
 }
 
+string UnaryPlusToken::getType() {
+    return "UnaryPlus";
+}

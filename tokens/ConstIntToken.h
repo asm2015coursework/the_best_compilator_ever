@@ -8,6 +8,7 @@ public:
     ConstIntToken(int value);
 
     virtual string toString();
+    virtual string getType();
 
     int value;
 };

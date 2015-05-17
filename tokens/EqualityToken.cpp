@@ -8,3 +8,7 @@ EqualityToken::EqualityToken(Token *left, Token *right) {
 string EqualityToken::toString() {
     return "(" + left->toString() + "==" + right->toString() + ")";
 }
+
+string EqualityToken::getType() {
+    return "Equality";
+}

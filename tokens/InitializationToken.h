@@ -8,6 +8,7 @@ public:
     InitializationToken(string type, string name, Token* expr);
 
     virtual string toString();
+    virtual string getType();
 
     string _name;
     string _type;

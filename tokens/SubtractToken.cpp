@@ -8,3 +8,7 @@ SubtractToken::SubtractToken(Token *left, Token *right) {
 string SubtractToken::toString() {
     return "(" + left->toString() + "-" + right->toString() + ")";
 }
+
+string SubtractToken::getType() {
+    return "Subtract";
+}

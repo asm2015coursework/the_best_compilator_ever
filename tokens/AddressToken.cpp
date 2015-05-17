@@ -7,3 +7,7 @@ AddressToken::AddressToken(Token* expr) {
 string AddressToken::toString() {
     return "(&" + expr->toString() + ")";
 }
+
+string AddressToken::getType() {
+    return "Address";
+}

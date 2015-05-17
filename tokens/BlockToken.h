@@ -11,6 +11,7 @@ public:
     BlockToken(vector<Token*> commands);
 
     virtual string toString();
+    virtual string getType();
 
     vector<Token*> _commands;
 };

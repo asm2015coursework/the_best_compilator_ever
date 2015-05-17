@@ -12,3 +12,7 @@ string BlockToken::toString() {
     ans += "}";
     return ans;
 }
+
+string BlockToken::getType() {
+    return "Block";
+}

@@ -7,3 +7,7 @@ UnaryMinusToken::UnaryMinusToken(Token* expr) {
 string UnaryMinusToken::toString() {
     return "(-" + expr->toString() + ")";
 }
+
+string UnaryMinusToken::getType() {
+    return "UnaryMinus";
+}

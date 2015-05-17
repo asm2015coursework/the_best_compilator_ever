@@ -8,3 +8,7 @@ OrToken::OrToken(Token *left, Token *right) {
 string OrToken::toString() {
     return "(" + left->toString() + "|" + right->toString() + ")";
 }
+
+string OrToken::getType() {
+    return "Or";
+}
