@@ -5,5 +5,6 @@ ReturnToken::ReturnToken(Token* expr) {
 }
 
 string ReturnToken::toString() {
-    return "return " + expr->toString();
+    if (expr == nullptr) return "return";
+        else return "return " + expr->toString();
 }

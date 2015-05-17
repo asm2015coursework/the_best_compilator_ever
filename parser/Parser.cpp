@@ -82,6 +82,12 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
             //ReturnToken
             x += 6;
             while (x < str.length() && isspace(str[x])) x++;
+            if (str[x] == ';') {
+                if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
+                return make_pair(new ReturnToken(nullptr), x);
+            }
             pair<Token*, size_t> p = expressionParse(x);
             x = p.second;
             if (str[x] != ';') throw ParsingException(x, ';', str[x]);
