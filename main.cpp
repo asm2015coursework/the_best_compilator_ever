@@ -30,14 +30,11 @@ int main(int argc, char *argv[]) {
     std::cout << asm_code;
 */
     Parser p;
-    vector<Token*> ans = p.parse("long f(long x, int y) {\n"
-                                 "}\n"
-                                 "char character;\n"
-                                 "int main() {\n"
-                                 "long lol;{int c; char kek;}\n"
-                                 "}");
+    //когда-нибудь Тимур сделает так, что этого не будет, но, видимо, не сегодня
+    vector<Token*> ans = p.parse("int f(int x, int y) {return x + y;\n}\nchar character;\n int main() {\nlong lol;{int c; char kek;\nkek = c = olo / hehe + ajgs * priv | a - kek & lol = omg;   x = lil | xoxo & artur & noob | pipka;} +++++a----b; k = 1 + -2 * 3254 / (c = 1); *&*&*&*&*&c; return 0;\n}");
+
     for (size_t i = 0; i < ans.size(); i++) {
-        std::cout << ans[i]->toString();
+        std::cout << ans[i]->toString() + ";\n";
     }
 
     return 0;
