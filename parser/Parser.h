@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <set>
 #include <tokens/Token.h>
 #include "ParsingException.h"
 #include "../tokens/InitializationToken.h"
@@ -23,6 +24,7 @@
 #include "../tokens/ReturnToken.h"
 
 using std::pair;
+using std::set;
 
 class Parser {
 public:
@@ -46,6 +48,7 @@ private:
     bool letter(char c);
 
     vector<Token*> ans;
+    set<string> types;
     string str;
 };
 

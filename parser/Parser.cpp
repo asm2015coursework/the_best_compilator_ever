@@ -4,6 +4,8 @@
 using std::make_pair;
 
 Parser::Parser() {
+    types.insert("int");
+    types.insert("long");
 }
 
 vector<Token*> Parser::parse(string code) {
@@ -13,9 +15,14 @@ vector<Token*> Parser::parse(string code) {
     size_t x = 0;
     while (x < str.length()) {
         while (x < str.length() && isspace(str[x])) x++;
-        pair<string, int> p = nameParse(x);
+        pair<string, int> p = nameParse(x);               
         string type = p.first;
         x = p.second;        
+        while (x < str.length() && (str[x] == '*' || str[x] == '&')) {
+            type += str[x];
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+        }
         p = nameParse(x);
         string name = p.first;
         x = p.second;        
@@ -53,7 +60,7 @@ vector<Token*> Parser::parse(string code) {
             if (x >= str.length()) throw ParsingException("unexpected end of file");
             if (str[x] != ';') throw ParsingException("; expected (symbol " + std::string(1, str[x]) + " " + std::to_string(x) + ")");
             x++;
-            while (x < str.length() && isspace(str[x])) x++;            
+            while (x < str.length() && isspace(str[x])) x++;
             ans.push_back(new InitializationToken(type, name, nullptr));
         }
     }
@@ -94,12 +101,17 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
             x++;
             while (x < str.length() && isspace(str[x])) x++;
             return make_pair(new ReturnToken(p.first), x);
-        } else if (nameFirstSymbol(str[y])) {
+        } else if (types.find(name) != types.end()) {
             //InititalizationToken
+            while (y < str.length() && (str[y] == '*' || str[y] == '&')) {
+                name += str[y];
+                y++;
+                while (y < str.length() && isspace(str[y])) y++;
+            }
             pair<string, int> p = nameParse(y);
             y = p.second;
             if (str[y] != ';') throw ParsingException(y, ';', str[y]);
-            y++;
+            y++;                    
             while (y < str.length() && isspace(str[y])) y++;
             return make_pair(new InitializationToken(name, p.first, nullptr), y);
         } else {
