@@ -39,16 +39,18 @@ int main(int argc, char *argv[]) {
     vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/test0.cmm"));
 
     string output = CodeGenerator::generate(tokens);
-    println(output);
-    /*for (size_t i = 0; i < ans.size(); i++) {
-        output += ans[i]->toString() + ";\n";
+
+    for (size_t i = 0; i < tokens.size(); i++) {
+        output += tokens[i]->toString() + ";\n";
     }
     output += '\n';
 
-    for (size_t i = 0; i < ans.size(); i++) {
-        output += ans[i]->getType() + ";\n";
+    for (size_t i = 0; i < tokens.size(); i++) {
+        output += tokens[i]->getType() + ";\n";
     }
-    output += '\n';*/
+    output += '\n';
+
+    println(output);
 
     //FileFromString("output", output);
 
