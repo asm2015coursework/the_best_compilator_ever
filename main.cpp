@@ -3,6 +3,8 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+
+
 #include "tokens/Token.h"
 #include "Preprocessor.h"
 #include "parser/Parser.h"
@@ -10,6 +12,8 @@
 #include "lib/Utils.h"
 
 #include <iostream>
+
+
 
 int main(int argc, char *argv[]) {
  /*
@@ -32,10 +36,11 @@ int main(int argc, char *argv[]) {
 */
     Parser parser;
     Preprocessor preproc;
-    vector<Token*> ans = parser.parse(preproc.preprocess("input"));
+    vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/test0.cmm"));
 
-    string output;
-    for (size_t i = 0; i < ans.size(); i++) {
+    string output = CodeGenerator::generate(tokens);
+    println(output);
+    /*for (size_t i = 0; i < ans.size(); i++) {
         output += ans[i]->toString() + ";\n";
     }
     output += '\n';
@@ -43,9 +48,10 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < ans.size(); i++) {
         output += ans[i]->getType() + ";\n";
     }
-    output += '\n';
+    output += '\n';*/
 
-    FileFromString("output", output);
+    //FileFromString("output", output);
+
 
     return 0;
 }

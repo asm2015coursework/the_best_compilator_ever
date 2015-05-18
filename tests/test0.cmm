@@ -1,0 +1,22 @@
+int f(int x, int y) {return x + y;}
+
+int notcharacter;
+int main() {
+long lol;
+int k;
+int c = 2;
+{
+int c = 3;
+int olo = 4;
+int hehe = 5;
+int ajgs = 6;
+int priv = 7;
+int kek = 8;
+int a = 9;
+kek = c = olo / hehe + ajgs * priv | a - kek & lol;
+}
+k = 1 + -2 * 3254 / (c = 1);
+*&*&*&*&*&c;
+return 0;
+}
+

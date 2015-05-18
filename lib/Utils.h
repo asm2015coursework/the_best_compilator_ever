@@ -7,7 +7,10 @@
 
 using std::string;
 
+#define println(x) std::cout << x << std::endl;
+
 string FileToString(string file_name);//returns NULL if failed to read file
 int FileFromString(string file_name, string source);//returns 1 if failed to write string
+string exec(string);// executes command and returns command's output
 
 #endif // UTILS_H

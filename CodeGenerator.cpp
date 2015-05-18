@@ -2,6 +2,13 @@
 
 #include <stdio.h>
 #include <typeinfo>
+#include <iostream>
+
+#define check(tokenType) if (token->getType() == #tokenType) {\
+                            handle##tokenType ((tokenType##Token *)token);\
+                         }
+
+#define println(s) std::cout << s << std::endl;
 
 
 CodeGenerator::CodeGenerator() {
@@ -29,7 +36,7 @@ void CodeGenerator::handleCode(const vector<Token*>& tokens) {
 }
 
 void CodeGenerator::handleToken(Token* token) {
-    if (typeid(token) == typeid(InitializationToken)) {
+    /*if (typeid(token) == typeid(InitializationToken)) {
         handleInitialization((InitializationToken*)token);
     }
     else if (typeid(token) == typeid(FunctionToken)) {
@@ -38,6 +45,13 @@ void CodeGenerator::handleToken(Token* token) {
     else if (typeid(token) == typeid(EqualityToken)) {
         handleEquality((EqualityToken*)token);
     }
+    else {
+        gotError = 1;
+        error = "Unknown token\n";
+    }*/
+    check(Initialization)
+    else check(Function)
+    else check(Equality)
     else {
         gotError = 1;
         error = "Unknown token\n";
@@ -50,14 +64,17 @@ void CodeGenerator::makeGlobalVariables() {
 }
 
 void CodeGenerator::handleInitialization(InitializationToken* token) {
+    println("got initialization");
     //put your code here ^_^
 }
 
 void CodeGenerator::handleFunction(FunctionToken* token) {
+    println("got function");
     //put your code here ^_^
 }
 
 void CodeGenerator::handleEquality(EqualityToken* token) {
+    println("got equality");
     //put your code here ^_^
 }
 
