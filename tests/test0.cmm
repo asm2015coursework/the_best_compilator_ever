@@ -4,15 +4,23 @@ int notcharacter;
 int main() {
 long lol;
 int k;
-int c = 2;
+int c;
+c = 2;
 {
-int c = 3;
-int olo = 4;
-int hehe = 5;
-int ajgs = 6;
-int priv = 7;
-int kek = 8;
-int a = 9;
+int c;
+c = 3;
+int olo;
+olo = 4;
+int hehe;
+hehe = 5;
+int ajgs;
+ajgs = 6;
+int priv;
+priv = 7;
+int kek;
+kek = 8;
+int a;
+a = 9;
 kek = c = olo / hehe + ajgs * priv | a - kek & lol;
 }
 k = 1 + -2 * 3254 / (c = 1);
