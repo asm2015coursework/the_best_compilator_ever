@@ -4,9 +4,9 @@ string FileToString(string file_name) {
     std::ifstream file(file_name);
     if (file.is_open()) {
         string bufferString, resultString = "";
-        while (file) {
+        while (!file.eof()) {
             getline(file, bufferString);
-            resultString += bufferString;
+            resultString += bufferString + '\n';
         }
         file.close();
         return resultString;
