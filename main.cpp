@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
     string output = CodeGenerator::generate(tokens);
 
-    for (size_t i = 0; i < tokens.size(); i++) {
+    /*for (size_t i = 0; i < tokens.size(); i++) {
         output += tokens[i]->toString() + ";\n";
     }
     output += '\n';
@@ -48,8 +48,7 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < tokens.size(); i++) {
         output += tokens[i]->getType() + ";\n";
     }
-    output += '\n';
-
+    output += '\n';*/
     println(output);
 
     //FileFromString("output", output);
