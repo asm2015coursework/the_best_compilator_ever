@@ -15,7 +15,7 @@
 
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {  
  /*
     if (!(argc == 2 || (argc == 4 && strcmp(argv[2], "-o") == 0))) {
         printf("Usage: ./the_best_compilator_ever <file to compile> -o <name of asm file>\n");

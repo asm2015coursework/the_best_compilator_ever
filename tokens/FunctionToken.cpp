@@ -1,6 +1,6 @@
 #include "FunctionToken.h"
 
-FunctionToken::FunctionToken(string type, string name, vector<Variable> args, Token *body) {
+FunctionToken::FunctionToken(string type, string name, vector<Variable> args, BlockToken *body) {
     this->_type = type;
     this->_name = name;
     this->_args = args;

@@ -34,7 +34,7 @@ public:
     Parser();
     vector<Token*> parse(string code);
 private:    
-    pair<Token*, size_t> blockParse(size_t x);
+    pair<BlockToken*, size_t> blockParse(size_t x);
     pair<Token*, size_t> commandParse(size_t x);
     pair<Token*, size_t> expressionParse(size_t x);
     pair<Token*, size_t> orParse(size_t x);

@@ -51,7 +51,7 @@ vector<Token*> Parser::parse(string code) {
             if (x >= str.length()) throw ParsingException("unexpected end of file");
             x++;
             while (x < str.length() && isspace(str[x])) x++;            
-            pair<Token*, size_t> res = blockParse(x);
+            pair<BlockToken*, size_t> res = blockParse(x);
             x = res.second;
             while (x < str.length() && isspace(str[x])) x++;
             ans.push_back(new FunctionToken(type, name, args, res.first));
@@ -342,7 +342,7 @@ pair<Token*, size_t> Parser::variableParse(size_t x) {
     return make_pair(new VariableToken(p.first), p.second);
 }
 
-pair<Token*, size_t> Parser::blockParse(size_t x) {
+pair<BlockToken*, size_t> Parser::blockParse(size_t x) {
     // { }
     if (str[x] != '{') throw ParsingException(x, '{', str[x]);
     x++;
