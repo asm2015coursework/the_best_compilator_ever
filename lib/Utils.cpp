@@ -15,13 +15,14 @@ string FileToString(string file_name) {
         // read data as a block:
         file.read (buffer, length);
 
-        delete[] buffer;
         if (!file) {
             file.close();
+            delete[] buffer;
             return NULL;
         } else {
             file.close();
             string source(buffer);
+            delete[] buffer;
             return source;
         }
     } else {
