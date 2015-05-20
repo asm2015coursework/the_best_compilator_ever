@@ -6,14 +6,26 @@
 string FileToString(string file_name) {
     std::ifstream file(file_name);
     if (file.is_open()) {
-        string bufferString, resultString = "";
-        while (!file.eof()) {
-            getline(file, bufferString);
-            resultString += bufferString + '\n';
+        // get length of file:
+        file.seekg (0, file.end);
+        int length = file.tellg();
+        file.seekg (0, file.beg);
+
+        char * buffer = new char [length];
+        // read data as a block:
+        file.read (buffer, length);
+
+        delete[] buffer;
+        if (!file) {
+            file.close();
+            return NULL;
+        } else {
+            file.close();
+            string source(buffer);
+            return source;
         }
-        file.close();
-        return resultString;
     } else {
+        file.close();
         return NULL;
     }
 }
