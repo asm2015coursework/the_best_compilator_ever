@@ -71,6 +71,7 @@ void CodeGenerator::handleToken(Token* token) {
     firstcheck(Address)
             check(Add)
             check(And)
+            check(Asm)
             check(Assignment)
             check(Block)
             check(ConstInt)
@@ -134,6 +135,10 @@ void CodeGenerator::handleAnd(AndToken* token) {
     handleToken(token->right);
     append("pop rdx");
     append("and rax, rdx");
+}
+
+void CodeGenerator::handleAsm(AsmToken* token) {
+    append(token->code);
 }
 
 void CodeGenerator::handleAssignment(AssignmentToken* token) {

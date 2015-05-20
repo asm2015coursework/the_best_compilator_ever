@@ -30,6 +30,7 @@ class CodeGenerator {
     void handleAddress(AddressToken*);
     void handleAdd(AddToken*);
     void handleAnd(AndToken*);
+    void handleAsm(AsmToken*);
     void handleAssignment(AssignmentToken*);
     void handleBlock(BlockToken*);
     void handleConstInt(ConstIntToken*);
