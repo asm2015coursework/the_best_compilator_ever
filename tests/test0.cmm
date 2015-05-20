@@ -23,11 +23,6 @@ int a;
 a = 9;
 kek = c = olo / hehe + ajgs * priv | a - kek & lol;
 }
-asm {
-	mov rbx, 123
-	add rbx
-	xor aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, a
-}
 k = 1 + -2 * 3254 / (c = 1);
 *&*&*&*&*&c;
 k = f(k * k, k + c / c);

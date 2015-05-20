@@ -48,3 +48,20 @@ string sizeToString(size_t n) {
     sstm << n;
     return sstm.str();
 }
+
+string intToString(int n) {
+    std::stringstream sstm;
+    sstm << n;
+    return sstm.str();
+}
+
+string offsetToString(long long n) {
+    std::stringstream sstm;
+    if (n > 0) {
+        sstm << "+ " << n;
+    } else if (n < 0) {
+        sstm << n;
+    }
+    //надеюсь, при нуле будет возвращаться пустая строка
+    return sstm.str();
+}

@@ -13,5 +13,7 @@ string FileToString(string file_name);//returns NULL if failed to read file
 int FileFromString(string file_name, string source);//returns 1 if failed to write string
 string exec(string);// executes command and returns command's output
 string sizeToString(size_t);
+string intToString(int);
+string offsetToString(long long);
 
 #endif // UTILS_H
