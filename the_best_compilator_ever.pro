@@ -77,3 +77,7 @@ HEADERS += \
     tokens/AsmToken.h \
     tokens/FunctionCallToken.h \
     tokens/ConstCharToken.h
+
+OTHER_FILES += \
+    tests/test0.cmm \
+    tests/test1.cmm
