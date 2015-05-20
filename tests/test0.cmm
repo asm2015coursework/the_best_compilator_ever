@@ -1,6 +1,6 @@
 int f(int x, int y) {return x + y;}
 
-int* notcharacter;
+int notcharacter;
 int main() {
 long lol;
 int k;
