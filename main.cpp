@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 */
     Parser parser;
     Preprocessor preproc;
-    vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/test0.cmm"));
+    vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/test1.cmm"));
 
     string output = CodeGenerator::generate(tokens);
 

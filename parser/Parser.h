@@ -10,6 +10,7 @@
 #include "../tokens/VariableToken.h"
 #include "../tokens/BlockToken.h"
 #include "../tokens/ConstIntToken.h"
+#include "../tokens/ConstCharToken.h"
 #include "../tokens/AddToken.h"
 #include "../tokens/SubtractToken.h"
 #include "../tokens/MultiplyToken.h"
@@ -22,6 +23,8 @@
 #include "../tokens/UnaryMinusToken.h"
 #include "../tokens/UnaryPlusToken.h"
 #include "../tokens/ReturnToken.h"
+#include "../tokens/AsmToken.h"
+#include "../tokens/FunctionCallToken.h"
 
 using std::pair;
 using std::set;
@@ -40,7 +43,8 @@ private:
     pair<Token*, size_t> multiplyDivideParse(size_t x);
     pair<Token*, size_t> unaryParse(size_t x);
     pair<Token*, size_t> variableParse(size_t x);
-    pair<Token*, size_t> constParse(size_t x);
+    pair<Token*, size_t> constIntParse(size_t x);
+    pair<Token*, size_t> constCharParse(size_t x);
 
     pair<string, size_t> nameParse(size_t x);
     bool nameSymbol(char c);

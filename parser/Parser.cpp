@@ -6,6 +6,7 @@ using std::make_pair;
 Parser::Parser() {
     types.insert("int");
     types.insert("long");
+    types.insert("char");
 }
 
 vector<Token*> Parser::parse(string code) {
@@ -76,7 +77,21 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
         string name = p.first;
         size_t y = p.second;
         if (y >= str.length()) throw ParsingException("unexpected end of file");        
-        if (name == "if") {
+        if (name == "asm") {
+            x = y;
+            string f = "";
+            while (x < str.length() && isspace(str[x])) x++;
+            if (str[x] != '{') throw ParsingException(x, '{', str[x]);
+            while (x < str.length() && str[x] != '}') {
+                f += str[x];
+                x++;
+            }
+            if (x >= str.length()) throw ParsingException("unexpected end of file");
+            f += str[x];
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            return make_pair(new AsmToken(f), x);
+        } else if (name == "if") {
             //IfToken
 
         } else if (name == "for") {
@@ -224,30 +239,59 @@ pair<Token*, size_t> Parser::multiplyDivideParse(size_t x) {
 
 pair<Token*, size_t> Parser::unaryParse(size_t x) {
     if (str[x] == '*') {
+        //DereferenceToken
         x++;
         while (x < str.length() && isspace(str[x])) x++;
         pair<Token*, size_t> p = unaryParse(x);
         return make_pair(new DereferenceToken(p.first), p.second);
     } else if (str[x] == '&') {
+        //AddressToken
         x++;
         while (x < str.length() && isspace(str[x])) x++;
         pair<Token*, size_t> p = unaryParse(x);
         return make_pair(new AddressToken(p.first), p.second);
     } else if (str[x] == '-') {
+        //UnaryMinusToken
         x++;
         while (x < str.length() && isspace(str[x])) x++;
         pair<Token*, size_t> p = unaryParse(x);
         return make_pair(new UnaryMinusToken(p.first), p.second);
     } else if (str[x] == '+') {
+        //UnaryPlusToken
         x++;
         while (x < str.length() && isspace(str[x])) x++;
         pair<Token*, size_t> p = unaryParse(x);
         return make_pair(new UnaryPlusToken(p.first), p.second);
     } else if (nameFirstSymbol(str[x])){
-        return variableParse(x);
+        pair<string, size_t> p = nameParse(x);
+        string name = p.first;
+        if (str[p.second] == '(') {
+            //FunctionCallToken
+            x = p.second;
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            vector<Token*> args;
+            while (x < str.length() && str[x] != ')') {
+                pair<Token*, size_t> p = expressionParse(x);
+                args.push_back(p.first);
+                x = p.second;
+                if (str[x] == ')') break;
+                if (str[x] != ',') throw ParsingException("expected argument of function " + name);
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
+            }
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            return make_pair(new FunctionCallToken(name, args), x);
+        } else {
+            //VariableToken
+            return variableParse(x);
+        }
     } else if (str[x] >= '0' && str[x] <= '9') {
-        return constParse(x);
-    } else { // brackets
+        return constIntParse(x);
+    } else if (str[x] == '\'') {
+        return constCharParse(x);
+    } else { //if (str[x] == '(') { // brackets
         if (str[x] != '(') throw ParsingException(x, '(', str[x]);
         x++;
         while (x < str.length() && isspace(str[x])) x++;
@@ -260,7 +304,7 @@ pair<Token*, size_t> Parser::unaryParse(size_t x) {
     }
 }
 
-pair<Token*, size_t> Parser::constParse(size_t x) {
+pair<Token*, size_t> Parser::constIntParse(size_t x) {
     string f = "";
     while (str[x] >= '0' && str[x] <= '9') {
         f += str[x];
@@ -271,8 +315,29 @@ pair<Token*, size_t> Parser::constParse(size_t x) {
     return make_pair(new ConstIntToken(v), x);
 }
 
+pair<Token*, size_t> Parser::constCharParse(size_t x) {
+    x++;
+    while (x < str.length() && isspace(str[x])) x++;
+    string f = "";
+    while (x < str.length() && str[x] != '\'') {
+        f += str[x];
+        x++;
+    }
+    if (x >= str.length()) throw ParsingException("unexpected end of file");
+    if (f.length() > 2) throw ParsingException("wrong character constant");
+    x++;
+    while (x < str.length() && isspace(str[x])) x++;
+    char v = f[0];
+    if (v == '\\') {
+        if (f[1] == 'n') v = '\n'; else
+        if (f[1] == 't') v = '\t'; else
+        if (f[1] == '0') v = '\0'; else v = f[1];
+    }
+    return make_pair(new ConstCharToken(v), x);
+}
+
 pair<Token*, size_t> Parser::variableParse(size_t x) {
-    //VariableToken or ReturnToken
+    //VariableToken
     pair<string, size_t> p = nameParse(x);    
     return make_pair(new VariableToken(p.first), p.second);
 }
