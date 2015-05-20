@@ -52,6 +52,7 @@ string CodeGenerator::generate(const vector<Token*>& tokens) {
     if (codeGenerator.gotError == 1) {
         std::cout << "Error:\n" << codeGenerator.error;
         return "";
+
     }
     return codeGenerator.code;
 }
@@ -77,6 +78,7 @@ void CodeGenerator::handleToken(Token* token) {
             check(Divide)
             check(Equality)
             //check(For)
+            check(FunctionCall)
             check(Function)
             //check(If)
             check(Initialization)
@@ -87,8 +89,7 @@ void CodeGenerator::handleToken(Token* token) {
             check(UnaryMinus)
             check(Variable)
     else {
-        gotError = 1;
-        error = "Unknown token\n";
+        err("Unknown token type: " + token->getType());
     }
 }
 
@@ -127,11 +128,58 @@ void CodeGenerator::handleAdd(AddToken* token) {
 }
 
 void CodeGenerator::handleAnd(AndToken* token) {
-
+    ///нужно сделать проверку типов
+    handleToken(token->left);
+    append("push rax");
+    handleToken(token->right);
+    append("pop rdx");
+    append("and rax, rdx");
 }
 
 void CodeGenerator::handleAssignment(AssignmentToken* token) {
-
+///нужно запилить другие типы (в частности пользовательские структуры)
+    handleToken(token->right);
+    if (token->left->getType() == "Variable") {
+        ///нужно запилить другие типы
+        long long var_offset;
+        string type;
+        string name = ((VariableToken*)(token->left))->_name;
+        for (int i = (int)vars.size() - 1; i >= 0; i--) {
+            if (vars[i].count(name) == 1) {
+                var_offset = vars[i][name].first;
+                type = vars[i][name].second;
+                if (types[type] == 1) {
+                    append("mov byte[rbp " + offsetToString(var_offset) + "], al");
+                } else if (types[type] == 2) {
+                    append("mov word[rbp " + offsetToString(var_offset) + "], ax");
+                } else if (types[type] == 4) {
+                    append("mov dword[rbp " + offsetToString(var_offset) + "], eax");
+                } else if (types[type] == 8) {
+                    append("mov qword[rbp " + offsetToString(var_offset) + "], rax");
+                } else {
+                    err("Wrong type's size of variable: " + name);
+                }
+                return;
+            }
+        }
+        if (globals.count(name) == 1) {
+            if (types[type] == 1) {
+                append("mov byte[" + name + "], al");
+            } else if (types[type] == 2) {
+                append("mov word[" + name + "], ax");
+            } else if (types[type] == 4) {
+                append("mov dword[" + name + "], eax");
+            } else if (types[type] == 8) {
+                append("mov qword[" + name+ "], rax");
+            } else {
+                err("Wrong type's size of variable: " + name);
+            }
+            return;
+        }
+        err("Unknow variable: " + name);
+    } else {
+        err("Ask Artur to finish CodeGenerator::handleAssignment function");///ну понятно
+    }
 }
 
 void CodeGenerator::handleBlock(BlockToken* token) {
@@ -153,7 +201,13 @@ void CodeGenerator::handleDereference(DereferenceToken* token) {
 }
 
 void CodeGenerator::handleDivide(DivideToken* token) {
-
+    ///нужно сделать проверку типов!!!
+    handleToken(token->left);
+    append("push rax");
+    handleToken(token->right);
+    append("pop rbx");
+    append("xor rdx, rdx");
+    append("idiv rbx");
 }
 
 void CodeGenerator::handleEquality(EqualityToken* token) {
@@ -161,6 +215,10 @@ void CodeGenerator::handleEquality(EqualityToken* token) {
 }
 
 //void CodeGenerator::handleFor(ForToken* token);
+
+void CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
+
+}
 
 void CodeGenerator::handleFunction(FunctionToken* token) {
     if (vars.size() > 0) {
@@ -186,8 +244,8 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
         offset += types[token->_args[i]._type];
     }
     offset = 0;
-    handleBlock((BlockToken*)token->_body);///ждать, когда блоктокен станет блоктокеном
-    if (((BlockToken*)(token->_body))->_commands.back()->getType() != "Return") {///ждать, когда блоктокен станет блоктокеном
+    handleBlock(token->_body);
+    if (token->_body->_commands.back()->getType() != "Return") {
         append("mov rsp, rbp");
         append("ret");
     }
@@ -213,11 +271,21 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
 }
 
 void CodeGenerator::handleMultiply(MultiplyToken* token) {
-
+    ///нужно сделать проверку типов!!!
+    handleToken(token->left);
+    append("push rax");
+    handleToken(token->right);
+    append("pop rdx");
+    append("imul rdx");
 }
 
 void CodeGenerator::handleOr(OrToken* token) {
-
+    ///нужно сделать проверку типов
+    handleToken(token->left);
+    append("push rax");
+    handleToken(token->right);
+    append("pop rdx");
+    append("or rax, rdx");
 }
 
 void CodeGenerator::handleReturn(ReturnToken* token) {
@@ -257,15 +325,15 @@ void CodeGenerator::handleVariable(VariableToken* token) {
             type = vars[i][token->_name].second;
             if (types[type] == 1) {
                 append("xor rax, rax");
-                append("mov, al, byte[rsb " + offsetToString(var_offset) + "]");
+                append("mov al, byte[rbp " + offsetToString(var_offset) + "]");
             } else if (types[type] == 2) {
                 append("xor rax, rax");
-                append("mov, ax, word[rsb " + offsetToString(var_offset) + "]");
+                append("mov ax, word[rbp " + offsetToString(var_offset) + "]");
             } else if (types[type] == 4) {
                 append("xor rax, rax");
-                append("mov, eax, dword[rsb " + offsetToString(var_offset) + "]");
+                append("mov eax, dword[rbp " + offsetToString(var_offset) + "]");
             } else if (types[type] == 8) {
-                append("mov, rax, qword[rsb " + offsetToString(var_offset) + "]");
+                append("mov rax, qword[rbp " + offsetToString(var_offset) + "]");
             } else {
                 err("Wrong type's size of variable: " + token->_name);
             }
@@ -275,15 +343,15 @@ void CodeGenerator::handleVariable(VariableToken* token) {
     if (globals.count(token->_name) == 1) {
         if (types[type] == 1) {
             append("xor rax, rax");
-            append("mov, al, byte[" + token->_name + "]");
+            append("mov al, byte[" + token->_name + "]");
         } else if (types[type] == 2) {
             append("xor rax, rax");
-            append("mov, ax, word[" + token->_name + "]");
+            append("mov ax, word[" + token->_name + "]");
         } else if (types[type] == 4) {
             append("xor rax, rax");
-            append("mov, eax, dword[" + token->_name + "]");
+            append("mov eax, dword[" + token->_name + "]");
         } else if (types[type] == 8) {
-            append("mov, rax, qword[" + token->_name+ "]");
+            append("mov rax, qword[" + token->_name+ "]");
         } else {
             err("Wrong type's size of variable: " + token->_name);
         }

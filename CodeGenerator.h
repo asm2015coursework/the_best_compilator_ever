@@ -37,6 +37,7 @@ class CodeGenerator {
     void handleDivide(DivideToken*);
     void handleEquality(EqualityToken*);
     //void handleFor(ForToken*);
+    void handleFunctionCall(FunctionCallToken*);
     void handleFunction(FunctionToken*);
     //void handleIf(IfToken*);
     void handleInitialization(InitializationToken*);
