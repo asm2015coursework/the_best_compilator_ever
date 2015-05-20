@@ -19,6 +19,7 @@ class CodeGenerator {
     int depth;
     map<string, long long> globals;
     vector<map<string, long long> > vars;
+    long long offset;
 
     CodeGenerator();
 

@@ -92,7 +92,23 @@ void CodeGenerator::handleToken(Token* token) {
 
 void CodeGenerator::makeGlobalVariables() {
     append("section .bss");
-    //put your code here ^_^
+    string res;
+    for (map<string, long long>::iterator i = globals.begin(); i != globals.end(); i++) {
+        if (i->second == 1) {
+            res = "resb";
+        } else if (i->second == 2) {
+            res = "resw";
+        } else if (i->second == 4) {
+            res = "resd";
+        } else if (i->second == 8) {
+            res = "resq";
+        } else if (i->second == 10) {
+            res = "rest";
+        } else {
+            err("Bad type size: " + sizeToString(i->second));//////////////////////////////////////////////////////
+        }
+        append(i->first + ": " + res + " 1");
+    }
 }
 
 void CodeGenerator::handleAddress(AddressToken* token) {
@@ -112,7 +128,12 @@ void CodeGenerator::handleAssignment(AssignmentToken* token) {
 }
 
 void CodeGenerator::handleBlock(BlockToken* token) {
-
+    size_t vars_depth = vars.size();
+    vars.push_back(map<string, long long>());
+    for (size_t i = 0; i < token->_commands.size(); i++) {
+        handleToken(token->_commands[i]);
+    }
+    vars.resize(vars_depth);
 }
 
 void CodeGenerator::handleConstInt(ConstIntToken* token) {
@@ -134,7 +155,9 @@ void CodeGenerator::handleEquality(EqualityToken* token) {
 //void CodeGenerator::handleFor(ForToken* token);
 
 void CodeGenerator::handleFunction(FunctionToken* token) {
-    long long offset = 8;
+    if (vars.size() > 0) {
+        err("Can't initializate function here");
+    }
     if (types.count(token->_type) == 0) {
         err("wrong function type: " + token->_type);
     }
@@ -143,9 +166,9 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
             err("wrong function's parameter type: " + token->_args[i]._type);
         }
     }
+    offset = 8;
     append(token->_name + ":");
     append("mov rbp, rsp");
-    vars.resize(0);
     vars.push_back(map<string, long long>());
     for (size_t i = 0; i < token->_args.size(); i++) {
         if (vars[0].count(token->_args[i]._name) > 0) {
@@ -154,19 +177,29 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
         vars[0].insert(make_pair(token->_args[i]._name, offset));
         offset += types[token->_args[i]._type];
     }
-
-    handleBlock(token->_body);
+    offset = 0;
+    handleBlock((BlockToken*)token->_body);//////////////////////////////////////////////////////////////////////////////
     append("mov rsp, rbp");
     append("ret");
-
-
-
+    vars.clear();
 }
 
 //void CodeGenerator::handleIf(IfToken* token);
 
-void CodeGenerator::handleInitialization(InitializationToken* token) {
-
+void CodeGenerator::handleInitialization(InitializationToken* token) {///////////////////////////////////////////////////
+    if (vars.size() == 0) {
+        if (globals.count(token->_name) > 0) {
+            err("Global variable already exists: " + token->_name);
+        }
+        globals.insert(make_pair(token->_name, types[token->_type]));
+    } else {
+        if (vars.back().count(token->_name) > 0) {
+            err("Variable already exists: " + token->_name);
+        }
+        offset += types[token->_type];
+        append("add rsp, " + sizeToString(types[token->_type]));
+        vars.back().insert(make_pair(token->_name, offset));
+    }
 }
 
 void CodeGenerator::handleMultiply(MultiplyToken* token) {

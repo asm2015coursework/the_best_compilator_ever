@@ -1,5 +1,6 @@
 #include "Utils.h"
 
+#include <sstream>
 
 
 string FileToString(string file_name) {
@@ -42,3 +43,8 @@ string exec(string cmd) {
     return result;
 }
 
+string sizeToString(size_t n) {
+    std::stringstream sstm;
+    sstm << n;
+    return sstm.str();
+}
