@@ -3,35 +3,22 @@
 #include <sstream>
 
 
-string FileToString(string file_name) {
-    std::ifstream file(file_name);
+string fileToString(string file_name) {
+    std::ifstream file(file_name.c_str());
     if (file.is_open()) {
-        // get length of file:
-        file.seekg (0, file.end);
-        int length = file.tellg();
-        file.seekg (0, file.beg);
-
-        char * buffer = new char [length];
-        // read data as a block:
-        file.read (buffer, length);
-
-        if (!file) {
-            file.close();
-            delete[] buffer;
-            return NULL;
-        } else {
-            file.close();
-            string source(buffer);
-            delete[] buffer;
-            return source;
+        string bufferString = "", resultString = "";
+        while (file) {
+            resultString += bufferString + '\n';
+            getline(file, bufferString);
         }
-    } else {
         file.close();
-        return NULL;
+        return resultString;
+    } else {
+        return "";
     }
 }
 
-int FileFromString(string file_name, string source) {
+int fileFromString(string file_name, string source) {
     std::ofstream file(file_name);
     if (file.is_open()) {
         file << source;

@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     output += '\n';*/
     println(output);
     if (output != "") {
-        FileFromString("test0.asm", output);
+        fileFromString("test0.asm", output);
         println(exec("yasm -felf64 -dgwarf2 test0.asm -o test0.o"));
         println(exec("gcc test0.o -o test0"));
     }
