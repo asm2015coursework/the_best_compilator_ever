@@ -1,9 +1,7 @@
 int main() {
-	char artur_noob;
-	artur_noob = '\n';
-	artur_noob = '\t';
-	artur_noob = '\0';
-	artur_noob = 'n';
-	artur_noob = '0';
-        return 0;
+	int a;
+	int b;
+	a = a % b;
+	if (b) return 123;
+	if (a) return 0; else return 1;
 }

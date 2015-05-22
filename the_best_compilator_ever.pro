@@ -44,7 +44,9 @@ SOURCES += main.cpp \
     lib/Utils.cpp \
     tokens/AsmToken.cpp \
     tokens/FunctionCallToken.cpp \
-    tokens/ConstCharToken.cpp
+    tokens/ConstCharToken.cpp \
+    tokens/ModToken.cpp \
+    tokens/XorToken.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -76,7 +78,9 @@ HEADERS += \
     lib/Utils.h \
     tokens/AsmToken.h \
     tokens/FunctionCallToken.h \
-    tokens/ConstCharToken.h
+    tokens/ConstCharToken.h \
+    tokens/ModToken.h \
+    tokens/XorToken.h
 
 OTHER_FILES += \
     tests/test0.cmm \

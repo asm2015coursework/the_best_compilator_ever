@@ -92,8 +92,38 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
             while (x < str.length() && isspace(str[x])) x++;
             return make_pair(new AsmToken(f), x);
         } else if (name == "if") {
-            //IfToken
-
+            //IfToken            
+            x += 2;
+            while (x < str.length() && isspace(str[x])) x++;
+            if (x >= str.length()) throw ParsingException("unexpected end of file");
+            if (str[x] != '(') throw ParsingException(x, '(', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            pair<Token*, size_t> p = expressionParse(x);
+            Token* expr = p.first;
+            x = p.second;
+            if (str[x] != ')') throw ParsingException(x, ')', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            if (str[x] == '{') p = blockParse(x); else p = commandParse(x);
+            Token* block1 = p.first;
+            x = p.second;
+            string f = "";
+            y = x;
+            while (y < str.length() && y - x < 4) {
+                f += str[y];
+                y++;
+            }
+            if (f == "else") {
+                x = y;
+                while (x < str.length() && isspace(str[x])) x++;
+                if (str[x] == '{') p = blockParse(x); else p = commandParse(x);
+                Token* block2 = p.first;
+                x = p.second;
+                return make_pair(new IfToken(expr, block1, block2), x);
+            } else {
+                return make_pair(new IfToken(expr, block1, nullptr), x);
+            }
         } else if (name == "for") {
             //ForToken
 
@@ -167,16 +197,32 @@ pair<Token*, size_t> Parser::expressionParse(size_t x) {
 
 pair<Token*, size_t> Parser::orParse(size_t x) {
     //OrToken
-    pair<Token*, size_t> cur1 = andParse(x);
+    pair<Token*, size_t> cur1 = xorParse(x);
     x = cur1.second;
     while (x < str.length() && str[x] != ')' && str[x] != ';' && str[x] == '|') {
         char oprtn = str[x];
         if (oprtn != '|') throw ParsingException(x, '|', str[x]);
         x++;
         while (x < str.length() && isspace(str[x])) x++;
-        pair<Token*, size_t> cur2 = andParse(x);
+        pair<Token*, size_t> cur2 = xorParse(x);
         x = cur2.second;
         cur1.first = new OrToken(cur1.first, cur2.first);
+    }
+    return make_pair(cur1.first, x);
+}
+
+pair<Token*, size_t> Parser::xorParse(size_t x) {
+    //XorToken
+    pair<Token*, size_t> cur1 = andParse(x);
+    x = cur1.second;
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && str[x] == '^') {
+        char oprtn = str[x];
+        if (oprtn != '^') throw ParsingException(x, '^', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> cur2 = andParse(x);
+        x = cur2.second;
+        cur1.first = new XorToken(cur1.first, cur2.first);
     }
     return make_pair(cur1.first, x);
 }
@@ -218,20 +264,22 @@ pair<Token*, size_t> Parser::addSubtractParse(size_t x) {
 }
 
 pair<Token*, size_t> Parser::multiplyDivideParse(size_t x) {
-    //MultiplyToken or DivideToken
+    //MultiplyToken or DivideToken or ModToken
     pair<Token*, size_t> cur1 = unaryParse(x);
     x = cur1.second;
-    while (x < str.length() && str[x] != ')' && str[x] != ';' && (str[x] == '*' || str[x] == '/')) {
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && (str[x] == '*' || str[x] == '/' || str[x] == '%')) {
         char oprtn = str[x];
-        if (oprtn != '*' && oprtn != '/') throw ParsingException(x, '*', str[x]);
+        if (oprtn != '*' && oprtn != '/' && oprtn != '%') throw ParsingException(x, '*', str[x]);
         x++;
         while (x < str.length() && isspace(str[x])) x++;
         pair<Token*, size_t> cur2 = unaryParse(x);
         x = cur2.second;
         if (oprtn == '*') {
             cur1.first = new MultiplyToken(cur1.first, cur2.first);
-        } else { //oprtn == '/'
+        } else if (oprtn == '/') {
             cur1.first = new DivideToken(cur1.first, cur2.first);
+        } else {
+            cur1.first = new ModToken(cur1.first, cur2.first);
         }
     }
     return make_pair(cur1.first, x);

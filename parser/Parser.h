@@ -9,14 +9,17 @@
 #include "../tokens/EqualityToken.h"
 #include "../tokens/VariableToken.h"
 #include "../tokens/BlockToken.h"
+#include "../tokens/IfToken.h"
 #include "../tokens/ConstIntToken.h"
 #include "../tokens/ConstCharToken.h"
 #include "../tokens/AddToken.h"
+#include "../tokens/ModToken.h"
 #include "../tokens/SubtractToken.h"
 #include "../tokens/MultiplyToken.h"
 #include "../tokens/DivideToken.h"
 #include "../tokens/AssignmentToken.h"
 #include "../tokens/OrToken.h"
+#include "../tokens/XorToken.h"
 #include "../tokens/AndToken.h"
 #include "../tokens/DereferenceToken.h"
 #include "../tokens/AddressToken.h"
@@ -39,6 +42,7 @@ private:
     pair<Token*, size_t> expressionParse(size_t x);
     pair<Token*, size_t> orParse(size_t x);
     pair<Token*, size_t> andParse(size_t x);
+    pair<Token*, size_t> xorParse(size_t x);
     pair<Token*, size_t> addSubtractParse(size_t x);
     pair<Token*, size_t> multiplyDivideParse(size_t x);
     pair<Token*, size_t> unaryParse(size_t x);
