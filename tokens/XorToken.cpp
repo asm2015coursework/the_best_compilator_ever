@@ -6,9 +6,9 @@ XorToken::XorToken(Token *left, Token *right) {
 }
 
 string XorToken::toString() {
-    return "(" + left->toString() + "-" + right->toString() + ")";
+    return "(" + left->toString() + "^" + right->toString() + ")";
 }
 
 string XorToken::getType() {
-    return "Subtract";
+    return "Xor";
 }
