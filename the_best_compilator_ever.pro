@@ -80,7 +80,8 @@ HEADERS += \
     tokens/FunctionCallToken.h \
     tokens/ConstCharToken.h \
     tokens/ModToken.h \
-    tokens/XorToken.h
+    tokens/XorToken.h \
+    Type.h
 
 OTHER_FILES += \
     tests/test0.cmm \

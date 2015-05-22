@@ -18,21 +18,30 @@ using std::make_pair;
     handle##tokenType ((tokenType##Token *)token);\
 }
 
+#define type_firstcheck(tokenType) if (token->getType() == #tokenType) {\
+    println(#tokenType);\
+    return handle##tokenType ((tokenType##Token *)token);\
+}
+
+#define type_check(tokenType) else if (token->getType() == #tokenType) {\
+    println(#tokenType);\
+    return handle##tokenType ((tokenType##Token *)token);\
+}
+
+
 #define err(text) error = text;\
         gotError = 1;\
         return
+
+#define type_err(text) error = text;\
+        gotError = 1;\
+        return Type()
 
 #define types CodeGenerator::typeSize
 
 map<string, size_t> types;
 
 CodeGenerator::CodeGenerator() {
-    /*gotError = 0;
-    error.clear();
-    code.clear();
-    depth = 0;
-    vars.clear();
-    globals.clear();*/
     gotError = 0;
     if (types.size() == 0) {
         types.insert(make_pair("int", 4));
@@ -83,16 +92,41 @@ void CodeGenerator::handleToken(Token* token) {
             check(Function)
             //check(If)
             check(Initialization)
+            //check(Mod)
             check(Multiply)
             check(Or)
             check(Return)
             check(Subtract)
             check(UnaryMinus)
             check(Variable)
+            //check(Xor)
     else {
         err("Unknown token type: " + token->getType());
     }
 }
+
+Type CodeGenerator::handleTypeToken(Token* token) {
+    type_firstcheck(Address)
+            type_check(Add)
+            type_check(And)
+            type_check(Assignment)
+            type_check(ConstInt)
+            //check(Dereference)
+            type_check(Divide)
+            type_check(Equality)
+            type_check(FunctionCall)
+            type_check(Multiply)
+            //type_check(Mod)
+            type_check(Or)
+            type_check(Subtract)
+            type_check(UnaryMinus)
+            type_check(Variable)
+            //type_check(Xor)
+    else {
+        type_err("Unknown token type: " + token->getType());
+    }
+}
+
 
 void CodeGenerator::makeGlobalVariables() {
     append("section .bss");
@@ -115,35 +149,43 @@ void CodeGenerator::makeGlobalVariables() {
     }
 }
 
-void CodeGenerator::handleAddress(AddressToken* token) {
+Type CodeGenerator::handleAddress(AddressToken* token) {
 
 }
 
-void CodeGenerator::handleAdd(AddToken* token) {
-    ///нужно сделать проверку типов
-    handleToken(token->right);
+Type CodeGenerator::handleAdd(AddToken* token) {
+    Type r = handleTypeToken(token->right);
     append("push rax");
-    handleToken(token->left);
+    Type l = handleTypeToken(token->left);
     append("pop rdx");
     append("add rax, rdx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("Wrong types");
+    }
+    return res;
 }
 
-void CodeGenerator::handleAnd(AndToken* token) {
-    ///нужно сделать проверку типов
-    handleToken(token->left);
+Type CodeGenerator::handleAnd(AndToken* token) {
+    Type l = handleTypeToken(token->left);
     append("push rax");
-    handleToken(token->right);
+    Type r = handleTypeToken(token->right);
     append("pop rdx");
     append("and rax, rdx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("Wrong types");
+    }
+    return res;
 }
 
 void CodeGenerator::handleAsm(AsmToken* token) {
     append(token->code);
 }
 
-void CodeGenerator::handleAssignment(AssignmentToken* token) {
+Type CodeGenerator::handleAssignment(AssignmentToken* token) {
 ///нужно запилить другие типы (в частности пользовательские структуры)
-    handleToken(token->right);
+    Type res = handleTypeToken(token->right);
     if (token->left->getType() == "Variable") {
         ///нужно запилить другие типы
         long long var_offset;
@@ -162,9 +204,9 @@ void CodeGenerator::handleAssignment(AssignmentToken* token) {
                 } else if (types[type] == 8) {
                     append("mov qword[rbp " + offsetToString(var_offset) + "], rax");
                 } else {
-                    err("Wrong type's size of variable: " + name);
+                    type_err("Wrong type's size of variable: " + name);
                 }
-                return;
+                return res;
             }
         }
         if (globals.count(name) == 1) {
@@ -177,13 +219,13 @@ void CodeGenerator::handleAssignment(AssignmentToken* token) {
             } else if (types[type] == 8) {
                 append("mov qword[" + name+ "], rax");
             } else {
-                err("Wrong type's size of variable: " + name);
+                type_err("Wrong type's size of variable: " + name);
             }
-            return;
+            return res;
         }
-        err("Unknow variable: " + name);
+        type_err("Unknow variable: " + name);
     } else {
-        err("Ask Artur to finish CodeGenerator::handleAssignment function");///ну понятно
+        type_err("Ask Artur to finish CodeGenerator::handleAssignment function");///ну понятно
     }
 }
 
@@ -196,33 +238,41 @@ void CodeGenerator::handleBlock(BlockToken* token) {
     vars.resize(vars_depth);
 }
 
-void CodeGenerator::handleConstInt(ConstIntToken* token) {
+Type CodeGenerator::handleConstInt(ConstIntToken* token) {
     /// что-то сделать с типом нужно
     append("mov rax, " + intToString(token->value));
+    return Type("int");
 }
 
-void CodeGenerator::handleDereference(DereferenceToken* token) {
+Type CodeGenerator::handleDereference(DereferenceToken* token) {
 
 }
 
-void CodeGenerator::handleDivide(DivideToken* token) {
-    ///нужно сделать проверку типов!!!
-    handleToken(token->left);
+Type CodeGenerator::handleDivide(DivideToken* token) {
+    ///нужно сделать нормальную проверку типов!!!
+    Type l = handleTypeToken(token->left);
     append("push rax");
-    handleToken(token->right);
+    Type r = handleTypeToken(token->right);
     append("pop rbx");
     append("xor rdx, rdx");
     append("idiv rbx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("Wrong types");
+    }
+    return res;
 }
 
-void CodeGenerator::handleEquality(EqualityToken* token) {
+Type CodeGenerator::handleEquality(EqualityToken* token) {
 
 }
 
 //void CodeGenerator::handleFor(ForToken* token);
 
-void CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
+Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
+    for (int i = (int)token->args.size() - 1; i >= 0; i--) {
 
+    }
 }
 
 void CodeGenerator::handleFunction(FunctionToken* token) {
@@ -275,22 +325,32 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
     }
 }
 
-void CodeGenerator::handleMultiply(MultiplyToken* token) {
-    ///нужно сделать проверку типов!!!
-    handleToken(token->left);
+Type CodeGenerator::handleMultiply(MultiplyToken* token) {
+    ///нужно сделать нормальную проверку типов!!!
+    Type l = handleTypeToken(token->left);
     append("push rax");
-    handleToken(token->right);
+    Type r = handleTypeToken(token->right);
     append("pop rdx");
     append("imul rdx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("Wrong types");
+    }
+    return res;
 }
 
-void CodeGenerator::handleOr(OrToken* token) {
-    ///нужно сделать проверку типов
-    handleToken(token->left);
+Type CodeGenerator::handleOr(OrToken* token) {
+    ///нужно сделать нормальную проверку типов
+    Type l = handleTypeToken(token->left);
     append("push rax");
-    handleToken(token->right);
+    Type r = handleTypeToken(token->right);
     append("pop rdx");
     append("or rax, rdx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("Wrong types");
+    }
+    return res;
 }
 
 void CodeGenerator::handleReturn(ReturnToken* token) {
@@ -300,28 +360,35 @@ void CodeGenerator::handleReturn(ReturnToken* token) {
     append("ret");
 }
 
-void CodeGenerator::handleSubtract(SubtractToken* token) {
-    ///нужно сделать проверку типов
-    handleToken(token->right);
+Type CodeGenerator::handleSubtract(SubtractToken* token) {
+    ///нужно сделать нормальную проверку типов
+    Type r = handleTypeToken(token->right);
     append("push rax");
-    handleToken(token->left);
+    Type l = handleTypeToken(token->left);
     append("pop rdx");
     append("sub rax, rdx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("Wrong types");
+    }
+    return res;
 }
 
-void CodeGenerator::handleUnaryMinus(UnaryMinusToken* token) {
+Type CodeGenerator::handleUnaryMinus(UnaryMinusToken* token) {
     ///нужно сделать проверку типов
-    handleToken(token->expr);
+    Type res = handleTypeToken(token->expr);
     append("neg rax");
+    return res;
 }
 
-void CodeGenerator::handleUnaryPlus(UnaryPlusToken* token) {
+Type CodeGenerator::handleUnaryPlus(UnaryPlusToken* token) {
     ///ну хз
-    handleToken(token->expr);
+    Type res = handleTypeToken(token->expr);
+    return res;
 }
 
-void CodeGenerator::handleVariable(VariableToken* token) {
-    ///нужно запилить другие типы
+Type CodeGenerator::handleVariable(VariableToken* token) {
+    ///запилить не через жопу
     long long var_offset;
     string type;
     for (int i = (int)vars.size() - 1; i >= 0; i--) {
@@ -340,9 +407,9 @@ void CodeGenerator::handleVariable(VariableToken* token) {
             } else if (types[type] == 8) {
                 append("mov rax, qword[rbp " + offsetToString(var_offset) + "]");
             } else {
-                err("Wrong type's size of variable: " + token->_name);
+                type_err("Wrong type's size of variable: " + token->_name);
             }
-            return;
+            return Type(type);
         }
     }
     if (globals.count(token->_name) == 1) {
@@ -358,11 +425,24 @@ void CodeGenerator::handleVariable(VariableToken* token) {
         } else if (types[type] == 8) {
             append("mov rax, qword[" + token->_name+ "]");
         } else {
-            err("Wrong type's size of variable: " + token->_name);
+            type_err("Wrong type's size of variable: " + token->_name);
         }
-        return;
+        return Type(type);
     }
-    err("Unknow variable: " + token->_name);
+    type_err("Unknow variable: " + token->_name);
+}
+
+Type CodeGenerator::handleXor(XorToken *token) {
+    Type l = handleTypeToken(token->left);
+    append("push rax");
+    Type r = handleTypeToken(token->right);
+    append("pop rdx");
+    append("xor rax, rdx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("Wrong types");
+    }
+    return res;
 }
 
 

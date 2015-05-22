@@ -6,6 +6,7 @@
 #include <map>
 
 #include "parser/Parser.h"
+#include "Type.h"
 
 using std::string;
 using std::vector;
@@ -22,33 +23,36 @@ class CodeGenerator {
     long long offset;
 
     CodeGenerator();
-
     void append(const string&);
     void makeGlobalVariables();
     void handleCode(const vector<Token*>&);
     void handleToken(Token*);
-    void handleAddress(AddressToken*);
-    void handleAdd(AddToken*);
-    void handleAnd(AndToken*);
+    Type handleTypeToken(Token*);
+
+    Type handleAddress(AddressToken*);
+    Type handleAdd(AddToken*);//result in RAX
+    Type handleAnd(AndToken*);//result in RAX
     void handleAsm(AsmToken*);
-    void handleAssignment(AssignmentToken*);
+    Type handleAssignment(AssignmentToken*);
     void handleBlock(BlockToken*);
-    void handleConstInt(ConstIntToken*);
-    void handleDereference(DereferenceToken*);
-    void handleDivide(DivideToken*);
-    void handleEquality(EqualityToken*);
+    Type handleConstInt(ConstIntToken*);
+    Type handleDereference(DereferenceToken*);
+    Type handleDivide(DivideToken*);//result in RAX
+    Type handleEquality(EqualityToken*);//result in RAX
     //void handleFor(ForToken*);
-    void handleFunctionCall(FunctionCallToken*);
+    Type handleFunctionCall(FunctionCallToken*);
     void handleFunction(FunctionToken*);
-    //void handleIf(IfToken*);
+    void handleIf(IfToken*);
     void handleInitialization(InitializationToken*);
-    void handleMultiply(MultiplyToken*);
-    void handleOr(OrToken*);
+    Type handleMod(ModToken*);
+    Type handleMultiply(MultiplyToken*);
+    Type handleOr(OrToken*);//result in RAX
     void handleReturn(ReturnToken*);
-    void handleSubtract(SubtractToken*);
-    void handleUnaryMinus(UnaryMinusToken*);
-    void handleUnaryPlus(UnaryPlusToken*);
-    void handleVariable(VariableToken*);
+    Type handleSubtract(SubtractToken*);
+    Type handleUnaryMinus(UnaryMinusToken*);//result in RAX
+    Type handleUnaryPlus(UnaryPlusToken*);//do nothing, just handle next token
+    Type handleVariable(VariableToken*);//result in RAX
+    Type handleXor(XorToken*);
 
 public:
     static string generate(const vector<Token*>&);
