@@ -19,7 +19,6 @@ TEMPLATE = app
 SOURCES += main.cpp \
     CodeGenerator.cpp \
     Preprocessor.cpp \
-    Variable.cpp \
     tokens/FunctionToken.cpp \
     parser/Parser.cpp \
     tokens/EqualityToken.cpp \

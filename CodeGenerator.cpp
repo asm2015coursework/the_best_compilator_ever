@@ -270,9 +270,36 @@ Type CodeGenerator::handleEquality(EqualityToken* token) {
 //void CodeGenerator::handleFor(ForToken* token);
 
 Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
+    Type t;
+    size_t total_size = 0;
     for (int i = (int)token->args.size() - 1; i >= 0; i--) {
-
+        t = handleTypeToken(token->args[i]);
+        if (t.size == 1) {
+            append("sub rsp, 1");
+            append("mov byte[rsp], al");
+            total_size += 1;
+        } else if (t.size == 2) {
+            append("sub rsp, 2");
+            append("mov word[rsp], ax");
+            total_size += 2;
+        } else if (t.size == 4) {
+            append("sub rsp, 4");
+            append("mov dword[rsp], eax");
+            total_size += 4;
+        } else if (t.size == 8) {
+            append("sub rsp, 8");
+            append("mov qword[rsp], rax");
+            total_size += 8;
+        } else {
+            type_err("wrong type");
+        }
     }
+    append("call " + token->name);
+    append("add rsp, " + sizeToString(total_size));
+    if (functions.count(token->name) == 0) {
+        type_err("Unknown function");
+    }
+    return functions[token->name];
 }
 
 void CodeGenerator::handleFunction(FunctionToken* token) {
@@ -287,8 +314,10 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
             err("wrong function's parameter type: " + token->_args[i]._type);
         }
     }
+    functions.insert(make_pair(token->_name, Type(token->_type)));
     offset = 8;
     append(token->_name + ":");
+    append("mov r15, rbp");
     append("mov rbp, rsp");
     vars.push_back(map<string, pair<long long, string> >());
     for (size_t i = 0; i < token->_args.size(); i++) {
@@ -301,6 +330,7 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
     offset = 0;
     handleBlock(token->_body);
     if (token->_body->_commands.back()->getType() != "Return") {
+        append("mov rbp, r15");
         append("mov rsp, rbp");
         append("ret");
     }
@@ -356,6 +386,7 @@ Type CodeGenerator::handleOr(OrToken* token) {
 void CodeGenerator::handleReturn(ReturnToken* token) {
     ///нужно сделать проверку типов
     handleToken(token->expr);
+    append("mov rbp, r15");
     append("mov rsp, rbp");
     append("ret");
 }

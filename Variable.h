@@ -7,10 +7,12 @@ using std::string;
 
 class Variable {
 public:
-    Variable(string type, string name);
-
     string _type;
     string _name;
+    Variable(string type, string name) {
+        this->_type = type;
+        this->_name = name;
+    }
 };
 
 #endif // VARIABLE_H

@@ -21,6 +21,7 @@ class CodeGenerator {
     map<string, long long> globals;
     vector<map<string, pair<long long, string> > > vars;//<name, <offset from rsb, type> >
     long long offset;
+    map<string, Type> functions;
 
     CodeGenerator();
     void append(const string&);
