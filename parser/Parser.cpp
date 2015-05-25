@@ -36,8 +36,13 @@ vector<Token*> Parser::parse(string code) {
             while (x < str.length() && str[x] != ')') {
                 while (x < str.length() && isspace(str[x])) x++;
                 p = nameParse(x);
-                string type = p.first;
-                x = p.second;                
+                string type = p.first;                
+                x = p.second;
+                while (x < str.length() && (str[x] == '*' || str[x] == '&')) {
+                    type += str[x];
+                    x++;
+                    while (x < str.length() && isspace(str[x])) x++;
+                }
                 p = nameParse(x);
                 string name = p.first;
                 x = p.second;                
