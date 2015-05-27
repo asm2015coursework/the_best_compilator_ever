@@ -24,6 +24,7 @@ string Preprocessor::preprocess(string file_name) {
 string Preprocessor::applyIncludes(string code) {
     const string includePointer = "#include";
     const string specialDirectory = this->includeDirectory;
+    const string format = ".cmm";
     string resultCode(code);
     string::size_type includePositionBegin = code.find(includePointer, 0);
     string::size_type includePosition, shift = 0;
@@ -35,7 +36,7 @@ string Preprocessor::applyIncludes(string code) {
         if (!this->inBrackets(code, includePositionBegin)) {
             if (code[includePosition] == '<') {
                 string fileName = code.substr(includePosition + 1, code.find('>', includePosition) - includePosition);
-                string fileSource = this->preprocess(specialDirectory + fileName);
+                string fileSource = this->preprocess(specialDirectory + fileName + format);
                 resultCode.replace(includePositionBegin + shift, includePosition - includePositionBegin + fileName.length() + 2, fileSource);
                 shift += includePosition - includePositionBegin + fileName.length() + 2 + fileSource.length();
             } else if (code[includePosition] == '"'){
