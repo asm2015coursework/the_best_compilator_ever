@@ -1,7 +1,16 @@
 #include "Preprocessor.h"
 
-Preprocessor::Preprocessor()
-{
+Preprocessor::Preprocessor() {
+    this->includeDirectory = "";
+}
+
+Preprocessor::Preprocessor(string includeDirectory) {
+    this->includeDirectory = includeDirectory;
+}
+
+int Preprocessor::setIncludeDirectory(string includeDirectory) {
+    this->includeDirectory = includeDirectory;
+    return 0;
 }
 
 string Preprocessor::preprocess(string file_name) {
@@ -14,7 +23,7 @@ string Preprocessor::preprocess(string file_name) {
 
 string Preprocessor::applyIncludes(string code) {
     const string includePointer = "#include";
-    const string specialDirectory = "";
+    const string specialDirectory = this->includeDirectory;
     string resultCode(code);
     string::size_type includePositionBegin = code.find(includePointer, 0);
     string::size_type includePosition, shift = 0;
