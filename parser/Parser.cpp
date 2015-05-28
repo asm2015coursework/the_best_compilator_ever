@@ -4,8 +4,7 @@
 using std::make_pair;
 
 Parser::Parser() {
-    types.insert("int");
-    types.insert("long");
+    types.insert("int");    
     types.insert("char");
 }
 
@@ -16,7 +15,8 @@ vector<Token*> Parser::parse(string code) {
     size_t x = 0;
     while (x < str.length()) {
         while (x < str.length() && isspace(str[x])) x++;
-        pair<string, int> p = nameParse(x);               
+        int y = x;
+        pair<string, int> p = nameParse(x);                       
         string type = p.first;
         x = p.second;        
         while (x < str.length() && (str[x] == '*' || str[x] == '&')) {
@@ -26,7 +26,7 @@ vector<Token*> Parser::parse(string code) {
         }
         p = nameParse(x);
         string name = p.first;
-        x = p.second;        
+        x = p.second;
 
         if (x < str.length() && str[x] == '(') {
             //FunctionToken
@@ -61,6 +61,7 @@ vector<Token*> Parser::parse(string code) {
             while (x < str.length() && isspace(str[x])) x++;
             ans.push_back(new FunctionToken(type, name, args, res.first));
         } else {
+            /*
             //InitializationToken
             while (x < str.length() && isspace(str[x])) x++;
             if (x >= str.length()) throw ParsingException("unexpected end of file");
@@ -68,11 +69,52 @@ vector<Token*> Parser::parse(string code) {
             x++;
             while (x < str.length() && isspace(str[x])) x++;
             ans.push_back(new InitializationToken(type, name, nullptr));
+            */
+            pair<InitializationToken*, size_t> p = initializationParse(y);
+            ans.push_back(p.first);
+            x = p.second;
         }
     }
 
 
     return ans;
+}
+
+pair<InitializationToken*, size_t> Parser::initializationParse(size_t x) {
+    //InititalizationToken
+    Token *size = nullptr;
+    Token *expr = nullptr;
+    pair<string, int> p = nameParse(x);
+    string name = p.first;
+    x = p.second;
+    while (x < str.length() && (str[x] == '*' || str[x] == '&')) {
+        name += str[x];
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+    }
+    pair<string, int> p2 = nameParse(x);
+    x = p2.second;
+    if (str[x] == '[') {
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = expressionParse(x);
+        size = p.first;
+        x = p.second;
+        if (str[x] != ']') throw ParsingException(x, ']', str[x]);
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+    }
+    if (str[x] == '=') {
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = expressionParse(x);
+        expr = p.first;
+        x = p.second;
+    }
+    if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+    x++;
+    while (x < str.length() && isspace(str[x])) x++;
+    return make_pair(new InitializationToken(name, p2.first, expr, size), x);
 }
 
 pair<Token*, size_t> Parser::commandParse(size_t x) {
@@ -130,8 +172,47 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
                 return make_pair(new IfToken(expr, block1, nullptr), x);
             }
         } else if (name == "for") {
-            //ForToken
-
+            //ForToken            
+            Token* expr1 = nullptr, *expr2 = nullptr, *expr3 = nullptr, *cmd = nullptr;
+            x += 3;
+            while (x < str.length() && isspace(str[x])) x++;
+            if (str[x] != '(') throw ParsingException(x, '(', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            if (types.find(nameParse(x).first) != types.end()) {
+                pair <Token*, size_t> p = initializationParse(x);
+                expr1 = p.first;
+                x = p.second;
+            } else {
+                pair <Token*, size_t> p = expressionParse(x);
+                expr1 = p.first;
+                x = p.second;
+                if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
+            }
+            pair <Token*, size_t> p2 = expressionParse(x);
+            expr2 = p2.first;
+            x = p2.second;
+            if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            pair <Token*, size_t> p3 = expressionParse(x);
+            expr3 = p3.first;
+            x = p3.second;
+            if (str[x] != ')') throw ParsingException(x, ')', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            if (str[x] == '{') {
+                pair <Token* , size_t> p3 = blockParse(x);
+                cmd = p3.first;
+                x = p3.second;
+            } else {
+                pair <Token* , size_t> p3 = commandParse(x);
+                cmd = p3.first;
+                x = p3.second;
+            }
+            return make_pair(new ForToken(expr1, expr2, expr3, cmd), x);
         } else if (name == "while") {
             //WhileToken
 
@@ -152,18 +233,7 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
             while (x < str.length() && isspace(str[x])) x++;
             return make_pair(new ReturnToken(p.first), x);
         } else if (types.find(name) != types.end()) {
-            //InititalizationToken
-            while (y < str.length() && (str[y] == '*' || str[y] == '&')) {
-                name += str[y];
-                y++;
-                while (y < str.length() && isspace(str[y])) y++;
-            }
-            pair<string, int> p = nameParse(y);
-            y = p.second;
-            if (str[y] != ';') throw ParsingException(y, ';', str[y]);
-            y++;                    
-            while (y < str.length() && isspace(str[y])) y++;
-            return make_pair(new InitializationToken(name, p.first, nullptr), y);
+            return initializationParse(x);
         } else {
             //Expression
             pair<Token*, size_t> p = expressionParse(x);
@@ -196,6 +266,26 @@ pair<Token*, size_t> Parser::expressionParse(size_t x) {
         pair<Token*, size_t> cur2 = expressionParse(x);
         x = cur2.second;
         cur1.first = new AssignmentToken(cur1.first, cur2.first);
+    }
+    return make_pair(cur1.first, x);
+}
+
+pair<Token*, size_t> Parser::equalityParse(size_t x) {
+    //EqualityToken
+    pair<Token*, size_t> cur1 = addSubtractParse(x);
+    x = cur1.second;
+    while (x + 1 < str.length() && str[x] != ')' && ((str[x] == '=' && str[x + 1] == '=') || (str[x] == '!' && str[x + 1] == '=')) ) {
+        char oprtn = str[x];
+        if (str[x + 1] != '=') throw ParsingException(x, '=', str[x]);
+        x += 2;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> cur2 = addSubtractParse(x);
+        x = cur2.second;
+        if (oprtn == '!') {
+            cur1.first = new NotEqualityToken(cur1.first, cur2.first);
+        } else {
+            cur1.first = new EqualityToken(cur1.first, cur2.first);
+        }
     }
     return make_pair(cur1.first, x);
 }
@@ -234,14 +324,14 @@ pair<Token*, size_t> Parser::xorParse(size_t x) {
 
 pair<Token*, size_t> Parser::andParse(size_t x) {
     //AndToken
-    pair<Token*, size_t> cur1 = addSubtractParse(x);
+    pair<Token*, size_t> cur1 = equalityParse(x);
     x = cur1.second;
     while (x < str.length() && str[x] != ')' && str[x] != ';' && str[x] == '&') {
         char oprtn = str[x];
         if (oprtn != '&') throw ParsingException(x, '&', str[x]);
         x++;
         while (x < str.length() && isspace(str[x])) x++;
-        pair<Token*, size_t> cur2 = addSubtractParse(x);
+        pair<Token*, size_t> cur2 = equalityParse(x);
         x = cur2.second;
         cur1.first = new AndToken(cur1.first, cur2.first);
     }
@@ -303,6 +393,12 @@ pair<Token*, size_t> Parser::unaryParse(size_t x) {
         while (x < str.length() && isspace(str[x])) x++;
         pair<Token*, size_t> p = unaryParse(x);
         return make_pair(new AddressToken(p.first), p.second);
+    } else if (str[x] == '!') {
+        //NotToken
+        x++;
+        while (x < str.length() && isspace(str[x])) x++;
+        pair<Token*, size_t> p = unaryParse(x);
+        return make_pair(new NotToken(p.first), p.second);
     } else if (str[x] == '-') {
         //UnaryMinusToken
         x++;
@@ -336,6 +432,16 @@ pair<Token*, size_t> Parser::unaryParse(size_t x) {
             x++;
             while (x < str.length() && isspace(str[x])) x++;
             return make_pair(new FunctionCallToken(name, args), x);
+        } else if (str[p.second] == '[') {
+            x = p.second;
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            pair<Token*, size_t> p = expressionParse(x);
+            x = p.second;
+            if (str[x] != ']') throw ParsingException(x, ']', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
+            return make_pair(new ArrayCallToken(name, p.first), x);
         } else {
             //VariableToken
             return variableParse(x);
@@ -344,6 +450,8 @@ pair<Token*, size_t> Parser::unaryParse(size_t x) {
         return constIntParse(x);
     } else if (str[x] == '\'') {
         return constCharParse(x);
+    } else  if (str[x] == '"') {
+        return constStringParse(x);
     } else { //if (str[x] == '(') { // brackets
         if (str[x] != '(') throw ParsingException(x, '(', str[x]);
         x++;
@@ -366,6 +474,19 @@ pair<Token*, size_t> Parser::constIntParse(size_t x) {
     while (x < str.length() && isspace(str[x])) x++;
     int v = std::stoi(f);
     return make_pair(new ConstIntToken(v), x);
+}
+
+pair<Token*, size_t> Parser::constStringParse(size_t x) {
+    x++;
+    while (x < str.length() && isspace(str[x])) x++;
+    string f = "";
+    while (x < str.length() && str[x] != '"') {
+        f += str[x];
+        x++;
+    }
+    x++;
+    while (x < str.length() && isspace(str[x])) x++;
+    return make_pair(new StringToken(f), x);
 }
 
 pair<Token*, size_t> Parser::constCharParse(size_t x) {

@@ -36,11 +36,11 @@ int main(int argc, char *argv[]) {
 */
     Parser parser;
     Preprocessor preproc;
-    vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/test0.cmm"));
+    vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/test1.cmm"));    
 
-    string output = CodeGenerator::generate(tokens);
+    string output = "";//CodeGenerator::generate(tokens);
 
-    /*for (size_t i = 0; i < tokens.size(); i++) {
+    for (size_t i = 0; i < tokens.size(); i++) {
         output += tokens[i]->toString() + ";\n";
     }
     output += '\n';
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < tokens.size(); i++) {
         output += tokens[i]->getType() + ";\n";
     }
-    output += '\n';*/
+    output += '\n';
     println(output);
     if (output != "") {
         fileFromString("test0.asm", output);

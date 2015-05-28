@@ -7,9 +7,12 @@
 #include "../tokens/InitializationToken.h"
 #include "../tokens/FunctionToken.h"
 #include "../tokens/EqualityToken.h"
+#include "../tokens/NotEqualityToken.h"
+#include "../tokens/NotToken.h"
 #include "../tokens/VariableToken.h"
 #include "../tokens/BlockToken.h"
 #include "../tokens/IfToken.h"
+#include "../tokens/ForToken.h"
 #include "../tokens/ConstIntToken.h"
 #include "../tokens/ConstCharToken.h"
 #include "../tokens/AddToken.h"
@@ -28,6 +31,8 @@
 #include "../tokens/ReturnToken.h"
 #include "../tokens/AsmToken.h"
 #include "../tokens/FunctionCallToken.h"
+#include "../tokens/ArrayCallToken.h"
+#include "../tokens/StringToken.h"
 
 using std::pair;
 using std::set;
@@ -38,17 +43,20 @@ public:
     vector<Token*> parse(string code);
 private:    
     pair<BlockToken*, size_t> blockParse(size_t x);
+    pair<InitializationToken*, size_t> initializationParse(size_t x);
     pair<Token*, size_t> commandParse(size_t x);
     pair<Token*, size_t> expressionParse(size_t x);
     pair<Token*, size_t> orParse(size_t x);
     pair<Token*, size_t> andParse(size_t x);
     pair<Token*, size_t> xorParse(size_t x);
+    pair<Token*, size_t> equalityParse(size_t x);
     pair<Token*, size_t> addSubtractParse(size_t x);
     pair<Token*, size_t> multiplyDivideParse(size_t x);
     pair<Token*, size_t> unaryParse(size_t x);
     pair<Token*, size_t> variableParse(size_t x);
     pair<Token*, size_t> constIntParse(size_t x);
     pair<Token*, size_t> constCharParse(size_t x);
+    pair<Token*, size_t> constStringParse(size_t x);
 
     pair<string, size_t> nameParse(size_t x);
     bool nameSymbol(char c);

@@ -45,7 +45,11 @@ SOURCES += main.cpp \
     tokens/FunctionCallToken.cpp \
     tokens/ConstCharToken.cpp \
     tokens/ModToken.cpp \
-    tokens/XorToken.cpp
+    tokens/XorToken.cpp \
+    tokens/NotToken.cpp \
+    tokens/NotEqualityToken.cpp \
+    tokens/StringToken.cpp \
+    tokens/ArrayCallToken.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -80,7 +84,11 @@ HEADERS += \
     tokens/ConstCharToken.h \
     tokens/ModToken.h \
     tokens/XorToken.h \
-    Type.h
+    Type.h \
+    tokens/NotToken.h \
+    tokens/NotEqualityToken.h \
+    tokens/StringToken.h \
+    tokens/ArrayCallToken.h
 
 OTHER_FILES += \
     tests/test0.cmm \
