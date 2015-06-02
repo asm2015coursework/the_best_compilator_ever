@@ -13,8 +13,6 @@
 
 #include <iostream>
 
-
-
 int main(int argc, char *argv[]) {  
  /*
     if (!(argc == 2 || (argc == 4 && strcmp(argv[2], "-o") == 0))) {
@@ -36,7 +34,10 @@ int main(int argc, char *argv[]) {
 */
     Parser parser;
     Preprocessor preproc;
-    vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/test1.cmm"));    
+
+    string TEST = "test1";
+
+    vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm"));
 
     string output = "";//CodeGenerator::generate(tokens);
 
@@ -45,15 +46,17 @@ int main(int argc, char *argv[]) {
     }
     output += '\n';
 
+    (*tokens[0]).toString();
+
     for (size_t i = 0; i < tokens.size(); i++) {
         output += tokens[i]->getType() + ";\n";
     }
     output += '\n';
     println(output);
     if (output != "") {
-        fileFromString("test0.asm", output);
-        println(exec("yasm -felf64 -dgwarf2 test0.asm -o test0.o"));
-        println(exec("gcc test0.o -o test0"));
+        fileFromString(TEST + ".asm", output);
+        println(exec("yasm -felf64 -dgwarf2 "+ TEST + ".asm -o  "+ TEST + ".o"));
+        println(exec("gcc "+ TEST + ".o -o " + TEST));
     }
 
     return 0;

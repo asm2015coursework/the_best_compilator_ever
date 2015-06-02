@@ -6,26 +6,35 @@ xor rdx, rdx
 mov ebx, dword[rsb + 8]
 mov rcx, qword[rsb + 12]
 mov edx, dword[rsb + 20]
-int 0x80
+syscall
 }
 return;
 }
 
+struct lol {
+    int x;
+    int y;
+    void f() {
+        return;
+    }
+    int xex(int x, int y) {
+        return x + y;
+    }
+}
+
 int main() {
-	int a;
-	int b;
-	a = a % b ^ b == a != b != !!!a == "dotadotadotadotadota";
-	if (b) return 123;
-	if (a) return 0; else return 1;
+    int a[333];
+    int b[a[2] + a[32] / a[2] + 123];
+    write(b[b[b[b[2]]]], "kek", b[222] + a[b[2]]);
 
-	char* str[123] = "artur noob";
+    while (a[1] + a[2] != 0) {
+        if (a[1] + a[2] == 123) break; else continue;
+        continue;
+    }
 
-	c[0] = '0';
-
-	for (int i = 0; i != 123123; i = i + 1) {
-		2 + 2;
-	}
-
-	for (int i = 0; i != 123123; i = i + 1) 1 + 1;
-
+    lol* LOL;
+    LOL->xex(1, 2);
+    (*LOL).xex(3, 4);
+    (*LOL).x;
+    LOL->y;
 }

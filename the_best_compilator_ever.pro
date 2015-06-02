@@ -49,7 +49,17 @@ SOURCES += main.cpp \
     tokens/NotToken.cpp \
     tokens/NotEqualityToken.cpp \
     tokens/StringToken.cpp \
-    tokens/ArrayCallToken.cpp
+    tokens/ArrayCallToken.cpp \
+    tokens/LowerToken.cpp \
+    tokens/GreaterToken.cpp \
+    tokens/BreakToken.cpp \
+    tokens/ContinueToken.cpp \
+    tokens/WhileToken.cpp \
+    tokens/StructToken.cpp \
+    tokens/StructVariableToken.cpp \
+    tokens/StructFunctionCallToken.cpp \
+    tokens/StructPtrFunctionCallToken.cpp \
+    tokens/StructPtrVariableToken.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -88,7 +98,17 @@ HEADERS += \
     tokens/NotToken.h \
     tokens/NotEqualityToken.h \
     tokens/StringToken.h \
-    tokens/ArrayCallToken.h
+    tokens/ArrayCallToken.h \
+    tokens/LowerToken.h \
+    tokens/GreaterToken.h \
+    tokens/BreakToken.h \
+    tokens/ContinueToken.h \
+    tokens/WhileToken.h \
+    tokens/StructToken.h \
+    tokens/StructVariableToken.h \
+    tokens/StructFunctionCallToken.h \
+    tokens/StructPtrFunctionCallToken.h \
+    tokens/StructPtrVariableToken.h
 
 OTHER_FILES += \
     tests/test0.cmm \
