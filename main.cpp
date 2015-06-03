@@ -4,12 +4,12 @@
 #include <iostream>
 #include <vector>
 
-
 #include "tokens/Token.h"
 #include "Preprocessor.h"
 #include "parser/Parser.h"
 #include "CodeGenerator.h"
 #include "lib/Utils.h"
+#include "tester/Tester.h"
 
 #include <iostream>
 
@@ -32,8 +32,10 @@ int main(int argc, char *argv[]) {
     freopen(output_file.data(), "w", stdout);
     std::cout << asm_code;
 */
-    Parser parser;
+    /*Parser parser;
     Preprocessor preproc;
+
+
 
     string TEST = "test1";
 
@@ -58,6 +60,9 @@ int main(int argc, char *argv[]) {
         println(exec("yasm -felf64 -dgwarf2 "+ TEST + ".asm -o  "+ TEST + ".o"));
         println(exec("gcc "+ TEST + ".o -o " + TEST));
     }
-
+*/
+    Tester tester;
+    tester.test("test2");
+    //tester.run_all();
     return 0;
 }

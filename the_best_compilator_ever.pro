@@ -117,4 +117,6 @@ OTHER_FILES += \
     tests/test1.cmm \
     parser/ReadMe \
     tester/README \
-    tests/test2.cmm
+    tests/test2.cmm \
+    tests/test3.cmm \
+    tests/test4.cmm
