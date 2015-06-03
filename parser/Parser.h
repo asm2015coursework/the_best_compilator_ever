@@ -43,6 +43,8 @@
 #include "../tokens/StructVariableToken.h"
 #include "../tokens/StructPtrVariableToken.h"
 #include "../tokens/StructPtrFunctionCallToken.h"
+#include "../tokens/LowerEqualityToken.h"
+#include "../tokens/GreaterEqualityToken.h"
 
 using std::pair;
 using std::set;
