@@ -60,7 +60,9 @@ SOURCES += main.cpp \
     tokens/StructFunctionCallToken.cpp \
     tokens/StructPtrFunctionCallToken.cpp \
     tokens/StructPtrVariableToken.cpp \
-    tester/Tester.cpp
+    tester/Tester.cpp \
+    tokens/LowerEqualityToken.cpp \
+    tokens/GreaterEqualityToken.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -110,7 +112,9 @@ HEADERS += \
     tokens/StructFunctionCallToken.h \
     tokens/StructPtrFunctionCallToken.h \
     tokens/StructPtrVariableToken.h \
-    tester/Tester.h
+    tester/Tester.h \
+    tokens/LowerEqualityToken.h \
+    tokens/GreaterEqualityToken.h
 
 OTHER_FILES += \
     tests/test0.cmm \

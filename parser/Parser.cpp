@@ -368,19 +368,26 @@ pair<Token*, size_t> Parser::equalityParse(size_t x) {
 }
 
 pair<Token*, size_t> Parser::greaterLowerParse(size_t x) {
-    //GreaterToken or LowerToken
+    //GreaterToken or LowerToken or GreaterEqualityToken or LowerEqualityToken
     pair<Token*, size_t> cur1 = addSubtractParse(x);
     x = cur1.second;
     while (x < str.length() && str[x] != ')' && str[x] != ';' && (str[x] == '<' || str[x] == '>')) {
         char oprtn = str[x];
         x++;
+        bool eq = false;
+        if (str[x] == '=') {
+            eq = true;
+            x++;
+        }
         while (x < str.length() && isspace(str[x])) x++;
         pair<Token*, size_t> cur2 = addSubtractParse(x);
         x = cur2.second;
         if (oprtn == '<') {
-            cur1.first = new LowerToken(cur1.first, cur2.first);
+            if (!eq) cur1.first = new LowerToken(cur1.first, cur2.first);
+                else cur1.first = new LowerEqualityToken(cur1.first, cur2.first);
         } else {
-            cur1.first = new GreaterToken(cur1.first, cur2.first);
+            if (!eq) cur1.first = new GreaterToken(cur1.first, cur2.first);
+                else cur1.first = new GreaterEqualityToken(cur1.first, cur2.first);
         }
     }
     return make_pair(cur1.first, x);
