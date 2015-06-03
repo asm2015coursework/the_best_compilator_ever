@@ -1,0 +1,7 @@
+u can run tests in different ways:
+
+1) run_all
+
+2) test(string name)
+
+3) run_tests(int*a, int test_num),  where a - array of test's id, test_num - number of tests

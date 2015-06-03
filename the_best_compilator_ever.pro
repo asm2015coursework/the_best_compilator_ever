@@ -60,7 +60,7 @@ SOURCES += main.cpp \
     tokens/StructFunctionCallToken.cpp \
     tokens/StructPtrFunctionCallToken.cpp \
     tokens/StructPtrVariableToken.cpp \
-    Tester.cpp
+    tester/Tester.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -110,10 +110,11 @@ HEADERS += \
     tokens/StructFunctionCallToken.h \
     tokens/StructPtrFunctionCallToken.h \
     tokens/StructPtrVariableToken.h \
-    Tester.h
+    tester/Tester.h
 
 OTHER_FILES += \
     tests/test0.cmm \
     tests/test1.cmm \
     parser/ReadMe \
-    tests/test2.cmm \
+    tester/README \
+    tests/test2.cmm
