@@ -123,4 +123,4 @@ OTHER_FILES += \
     tester/README \
     tests/test2.cmm \
     tests/test3.cmm \
-    tests/test4.cmm
+    tester/log.txt

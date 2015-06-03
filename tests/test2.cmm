@@ -9,7 +9,7 @@ int main() {
     int id = 10;
     int f[id + 1];
     f[0] = f[1] = 1;
-    for (int i = 2; i <= id; ++i)
+    for (int i = 2; i <= id; i = i + 1)
         f[i] = f[i - 1] + f[i - 2];
     return 0;
 }
