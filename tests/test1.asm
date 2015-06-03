@@ -24,6 +24,10 @@ return (x+y);
 }
 }
 ;
+struct lol2 {
+lol x;
+}
+;
 int main()
 {
 int a[333];
@@ -36,11 +40,9 @@ continue;
 lol* LOL;
 (LOL)->xex(1, 2);
 ((*LOL)).xex(3, 4);
-(((*LOL)).x);
+((((*LOL)).x)+(((*LOL)).x));
 ((LOL)->y);
+lol2 LOL2;
+((((LOL2).x)).x);
 };
-
-Function;
-Struct;
-Function;
 

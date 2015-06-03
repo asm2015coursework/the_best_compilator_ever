@@ -35,7 +35,3 @@ int b;
 return 0;
 };
 
-Function;
-Initialization;
-Function;
-

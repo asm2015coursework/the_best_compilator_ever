@@ -33,19 +33,16 @@ int main(int argc, char *argv[]) {
 */
     /*Parser parser;
     Preprocessor preproc;
-    string TEST = "test1";
+    string TEST = "test3";
+
     vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm"));
     string output = "";//CodeGenerator::generate(tokens);
     for (size_t i = 0; i < tokens.size(); i++) {
         output += tokens[i]->toString() + ";\n";
     }
     output += '\n';
-    (*tokens[0]).toString();
-    for (size_t i = 0; i < tokens.size(); i++) {
-        output += tokens[i]->getType() + ";\n";
-    }
-    output += '\n';
-    println(output);
+
+    std::cout << output;
     if (output != "") {
         fileFromString(TEST + ".asm", output);
         println(exec("yasm -felf64 -dgwarf2 "+ TEST + ".asm -o  "+ TEST + ".o"));

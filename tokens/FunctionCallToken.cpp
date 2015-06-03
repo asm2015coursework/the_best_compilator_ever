@@ -7,10 +7,13 @@ FunctionCallToken::FunctionCallToken(string name, vector<Token*> args) {
 
 string FunctionCallToken::toString() {
     string ans = name + "(";
-    for (size_t i = 0; i < args.size() - 1; i++) {
-        ans += args[i]->toString() + ", ";
+    if (args.size() > 0) {
+        for (size_t i = 0; i < args.size() - 1; i++) {
+            ans += args[i]->toString() + ", ";
+        }
+        ans += args[args.size() - 1]->toString();
     }
-    ans += args[args.size() - 1]->toString() + ")";
+    ans += ")";
     return ans;
 }
 

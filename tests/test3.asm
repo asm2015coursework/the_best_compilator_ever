@@ -13,14 +13,9 @@ return n;
 int main()
 {
 int f[10];
-(f[0]=1);
-for (int i = one(1);(i<1);(i=(i+1))) {
+(f[0]=one());
+for (int i = one();(i<one());(i=s((i+1)))) {
 };
 return 0;
 };
-
-Function;
-Function;
-Function;
-Function;
 

@@ -13,6 +13,3 @@ for (int i = 2;(i<=id);(i=(i+1))) (f[i]=(f[(i-1)]+f[(i-2)]));
 return 0;
 };
 
-Function;
-Function;
-

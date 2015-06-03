@@ -34,19 +34,6 @@ int Tester::test(string name) {
          }
          output += '\n';
 
-         try{
-            (*tokens[0]).toString();
-
-         } catch(std::bad_cast& bc){
-            std::cout<<"bad_cast " << name << "\n";
-         }
-
-         for (size_t i = 0; i < tokens.size(); i++) {
-             output += tokens[i]->getType() + ";\n";
-         }
-         ;
-         output += "\n";
-
          log << output;
 
          //println(output);
@@ -60,7 +47,7 @@ int Tester::test(string name) {
              std::cout << "\n------output == "", " + name + "\n";
          }
     }  catch (ParsingException& ignored){
-        std::cout << "\n------Exception " + name + "\n";
+        std::cout << "\n------Exception " + std::string(ignored.what()) + "\n";
         return 1;
     }
 
@@ -85,7 +72,7 @@ int Tester::run_all(){
     int failed = 0;
     remove ("../the_best_compilator_ever/tester/log.txt");
 
-    for (int i = 0;i < 3 ; ++i){
+    for (int i = 0; i < 4 ; ++i){
         string name = "../the_best_compilator_ever/tests/test" + std::to_string(i);
         if (FILE *file = fopen((name+".cmm").c_str(), "r")) {
             fclose(file);
