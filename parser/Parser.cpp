@@ -546,15 +546,15 @@ pair<Token*, size_t> Parser::structVariableOrFunctionParse(size_t x) {
             x++;
             while (x < str.length() && isspace(str[x])) x++;
             if (oprtn == '.') {
-                return make_pair(new StructFunctionCallToken(cur1.first, cur2.first, args), x);
+                cur1.first = new StructFunctionCallToken(cur1.first, cur2.first, args);
             } else {
-                return make_pair(new StructPtrFunctionCallToken(cur1.first, cur2.first, args), x);
+                cur1.first = new StructPtrFunctionCallToken(cur1.first, cur2.first, args);
             }
         } else {
             if (oprtn == '.') {
-                return make_pair(new StructVariableToken(cur1.first, cur2.first), x);
+                cur1.first = new StructVariableToken(cur1.first, cur2.first);
             } else {
-                return make_pair(new StructPtrVariableToken(cur1.first, cur2.first), x);
+                cur1.first = new StructPtrVariableToken(cur1.first, cur2.first);
             }
         }
     }

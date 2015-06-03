@@ -22,6 +22,10 @@ struct lol {
     }
 }
 
+struct lol2 {
+    lol x;
+}
+
 int main() {
     int a[333];
     int b[a[2] + a[32] / a[2] + 123];
@@ -35,6 +39,9 @@ int main() {
     lol* LOL;
     LOL->xex(1, 2);
     (*LOL).xex(3, 4);
-    (*LOL).x;
+    (*LOL).x + (*LOL).x;
     LOL->y;
+
+    lol2 LOL2;
+    LOL2.x.x;
 }
