@@ -99,8 +99,33 @@ void test5() {
 	cmm_free(b);
 }
 
+void test6() {
+	void *a = cmm_malloc(100000);
+	printf("%lld\n", a);
+	void *b = cmm_malloc(100);
+	printf("%lld\n", b);
+	void *c = cmm_malloc(100000);
+	printf("%lld\n", c);
+	void *d = cmm_malloc(100);
+	printf("%lld\n", d);
+	int *array = (int *) c;
+	for (int i = 0; i < 25000; i++) {
+		array[i] = i;
+	}
+	cmm_free(a);
+	cmm_free(b);
+	cmm_free(d);
+	for (int i = 0; i < 25000; i++) {
+		if (array[i] != i) {
+			printf("%s\n", "AAAAAA");
+		}
+	}
+	printf("%s\n", "OK");
+}
+
+
 int main(int arg, char* args[]) {
-	test5();
+	test6();
 	
 	return 0;
 }
