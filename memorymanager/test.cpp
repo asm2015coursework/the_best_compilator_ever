@@ -3,26 +3,29 @@
 #include "manager.h"
 
 int main(int arg, char* args[]) {
-	init_my_heap();
-	void *t = my_malloc(102);
+	/*init_cmm_heap();
+	void *t = cmm_malloc(102);
 	printf("%lld\n", t);
-	t = my_malloc(10);
+	t = cmm_malloc(10);
 	printf("%lld\n", t);
-	t = my_malloc(10);
+	t = cmm_malloc(10);
 	printf("%lld\n", t);
-	/*t = my_malloc(10);
-	printf("%lld\n", t);
-	t = my_malloc(10);
-	printf("%lld\n", t);
-	t = my_malloc(10);
-	printf("%lld\n", t);*/
-	
-	my_free(t);
+	cmm_free(t);
+	int* c = (int*) t;
+	c[0] = 1;
+	printf("%d\n", c[0]);
 
-	t = my_malloc(1002);
+	t = cmm_malloc(400002);
 	printf("%lld\n", t);
-	t = my_malloc(1002);
+	t = cmm_malloc(1002);
 	printf("%lld\n", t);
-	
+	*/
+	void* a = malloc(100000);
+	printf("%lld\n", a);
+	void* d = malloc(10);
+	printf("%lld\n", d);
+	free(a);
+	void* e = malloc(101001);
+	printf("%lld\n", e);
 	return 0;
 }
