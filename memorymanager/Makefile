@@ -2,7 +2,7 @@ makeall: clean test
 
 test: test.o manager.a
 	g++ -Wall -msse -g -o $@ $^ 
-	./test
+	#./test
 
 test.o:
 	g++ test.cpp -Wall -g -c -o $@

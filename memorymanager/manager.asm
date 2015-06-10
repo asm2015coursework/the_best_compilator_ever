@@ -1,7 +1,5 @@
 global cmm_malloc
 global cmm_free
-global init_cmm_heap
-
 
 %define sys_brk               12
 %define chunk_info            21
@@ -10,19 +8,19 @@ global init_cmm_heap
 %define filled_chunk          byte  1
 
 %macro set_free 1
-    mov [%1 + 8], free_chunk
+    mov [%1 + 16], free_chunk
 %endmacro
 
 %macro set_filled 1
-    mov [%1 + 8], filled_chunk
+    mov [%1 + 16], filled_chunk
 %endmacro
 
 %macro get_state 2
-    mov %2, [%1 + 8]
+    mov %2, [%1 + 16]
 %endmacro
 
 %macro set_len 2
-    mov [%1 + 9], %2
+    mov [%1 + 17], %2
 %endmacro
 
 %macro set_prev 2
@@ -30,11 +28,11 @@ global init_cmm_heap
 %endmacro
 
 %macro set_next 2
-    mov [%1 + 4], %2
+    mov [%1 + 8], %2
 %endmacro
 
 %macro get_len 2
-    mov %2, [%1 + 9]
+    mov %2, [%1 + 17]
 %endmacro
 
 %macro get_prev 2
@@ -42,15 +40,17 @@ global init_cmm_heap
 %endmacro
 
 %macro get_next 2
-    mov %2, [%1 + 4]
+    mov %2, [%1 + 8]
 %endmacro
 
 
 section .data
-initial_break:          resq    1 
-current_break:          resq    1
-first_chunk:            resq    1
-last_chunk:             resq    1
+initial_break:          dq  0 
+current_break:          dq  0
+first_chunk:            dq  0
+last_chunk:             dq  0
+init:                   db  0
+
 ;new_break:              resq    0x00000000
 
 ;chunk:   |pointer to previous chunk|pointer to next chunk|filled/free|length of chunk| data |
@@ -67,6 +67,7 @@ init_cmm_heap:
     mov rax, NULL
     mov [first_chunk], rax
     mov [last_chunk], rax
+    mov [init], byte 1
     ret
 
 
@@ -74,6 +75,15 @@ init_cmm_heap:
 ; returns pointer to allocated memory
 ; allocates memory
 cmm_malloc:
+    cmp [init], byte 1
+    je .initialized
+    
+    push rdi
+    call init_cmm_heap
+    pop rdi
+
+.initialized
+
     mov rax, [first_chunk]
 
 .cycle
@@ -92,13 +102,15 @@ cmm_malloc:
 
     sub rdx, rdi
     cmp rdx, chunk_info
-    jg .divide_chunk
+    jg .split_chunk
 
     set_filled rax
-    add rax, chunk_info
-    ret
 
-.divide_chunk
+    add rax, chunk_info
+    jmp .exit
+
+.split_chunk
+
     mov rcx, rax
     add rcx, chunk_info
     add rcx, rdi
@@ -118,8 +130,10 @@ cmm_malloc:
     sub rdx, chunk_info
     sub rdx, rdi
     set_len rcx, edx
-
     set_len rax, edi
+
+    add rax, chunk_info
+    jmp .exit
 
 .doesnt_fit
     get_next rax, rdx
@@ -130,6 +144,7 @@ cmm_malloc:
     
     cmp rax, NULL
     jne .exit
+    mov rax, rdi
     call allocate_new_chunk
 
 .exit
@@ -140,6 +155,7 @@ cmm_malloc:
 ;doesn't work
 cmm_free:
     sub rdi, chunk_info
+    set_free rdi
     get_prev rdi, rax
     ;rax - pointer to previous chunk
     ;rdi - pointer to current chunk
@@ -150,6 +166,12 @@ cmm_free:
     get_state rax, dl
     cmp dl, filled_chunk
     je .dont_merge_prev
+
+    ;check if current chunk is last
+    cmp rdi, [last_chunk]
+    jne .not_last2
+    mov [last_chunk], rax
+.not_last2
 
     ;merging current chunk and previous chunk
     ;set next chunk in rax
@@ -186,6 +208,12 @@ cmm_free:
     cmp dl, filled_chunk
     je .dont_merge_next
 
+    ;check if rax is last chunk 
+    cmp [last_chunk], rax
+    jne .not_last
+    mov [last_chunk], rdi
+.not_last
+
     ;merging current chunk and next chunk
     ;set next chunk in rdi
     get_next rax, rcx
@@ -194,7 +222,7 @@ cmm_free:
     ;set prev chunk
     cmp rcx, NULL
     je .here2
-    set_prev rcx, rax
+    set_prev rcx, rdi
 .here2
 
 
@@ -219,25 +247,27 @@ try_to_free:
     get_state rax, dl
     cmp dl, filled_chunk
     je .exit
+    ; rax - last chunk
+    ; rdx - before the last
     
-.cycle
-    xor rdx, rdx
-    get_state rax, dl
-    cmp dl, filled_chunk
-    je .exit2
+    get_prev rax, rdx
+    cmp rdx, NULL
+    je .null2
+    mov rcx, NULL
+    set_next rdx, rcx
+.null2
+    mov [last_chunk], rdx
 
-    mov [current_break], rax
-    get_prev rax, rcx
-    mov rdx, NULL
-    set_next rcx, rdx
-    mov [last_chunk], rcx 
-    
-    jmp .cycle
+    mov rcx, NULL
+    cmp [last_chunk], rcx
+    jne .not_null2
+    mov [first_chunk], rcx
+.not_null2
 
-.exit2
+    mov rdi, rax
     mov rax, sys_brk
-    mov rdi, [current_break]
     syscall
+    mov [current_break], rax
 
 .exit
     ret
@@ -258,6 +288,10 @@ allocate_new_chunk:
     ;filling prev
     mov rdi, [last_chunk]
     set_prev rax, rdi
+    cmp rdi, NULL
+    je .null
+    set_next rdi, rax
+.null
     ;filling next
     mov rdi, NULL
     set_next rax, rdi
@@ -266,20 +300,21 @@ allocate_new_chunk:
     ;set_len
     set_len rax, edx  
 
-    ;setting next last_chunk
-    mov rax, [last_chunk]
-    mov rdi, [current_break]
-    set_next rax, rdi
-
-    mov [last_chunk], rdi
 
     pop rax
     mov rdx, [current_break]
+    mov [last_chunk], rdx
     mov [current_break], rax
     mov rax, rdx
+
+    mov rcx, NULL
+    cmp [first_chunk], rcx
+    jne .not_null
+    mov [first_chunk], rax
+.not_null
+
     add rax, chunk_info
 
 .exit
     ret
-
 
