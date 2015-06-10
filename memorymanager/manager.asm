@@ -75,6 +75,10 @@ init_cmm_heap:
 ; returns pointer to allocated memory
 ; allocates memory
 cmm_malloc:
+    push rcx
+    push r11
+    push rdx
+    push rdi
     cmp [init], byte 1
     je .initialized
     
@@ -148,12 +152,24 @@ cmm_malloc:
     call allocate_new_chunk
 
 .exit
+    
+    pop rdi
+    pop rdx
+    pop r11
+    pop rcx
     ret
 
 
 ;rdi - pointer to memory
 ;doesn't work
 cmm_free:
+    push rcx
+    push r11
+    push rdx
+    push rdi
+    push r8
+    push rax
+
     sub rdi, chunk_info
     set_free rdi
     get_prev rdi, rax
@@ -238,6 +254,13 @@ cmm_free:
 .dont_merge_next
 
     call try_to_free
+
+    pop rax
+    pop r8
+    pop rdi
+    pop rdx
+    pop r11
+    pop rcx
     ret
 
 
