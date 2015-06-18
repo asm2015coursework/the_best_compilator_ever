@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-void* malloc(int sizemem);
-void free(void* ptrmem);
+void* cmm_malloc(int sizemem);
+void cmm_free(void* ptrmem);
 
 #ifdef __cplusplus
 }

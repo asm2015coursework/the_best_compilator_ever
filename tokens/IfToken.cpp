@@ -11,7 +11,7 @@ string IfToken::getType() {
 }
 
 string IfToken::toString() {
-    string ans =  "If (" + expr->toString() + ") " + block1->toString() + "";
+    string ans =  "if (" + expr->toString() + ") " + block1->toString() + "";
     if (block2 != nullptr) {
         ans += "; else " + block2->toString() + "";
     }

@@ -11,5 +11,5 @@ string ModToken::toString() {
 }
 
 string ModToken::getType() {
-    return "Multiply";
+    return "Mod";
 }

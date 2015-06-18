@@ -1,0 +1,11 @@
+u can run tests in different ways:
+
+1) run_all()
+
+2) run_once(string name) // run_once("test0")
+
+3) run_tests(int*a, int test_num),  where a - array of test's id, test_num - number of tests
+    // int a[2] = {3, 4};
+    // runt_tests(a, 2);
+
+the result of parsing is saved in "/tester/log.txt" and overwritten each time

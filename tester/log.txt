@@ -1,0 +1,125 @@
+======TESTING::../the_best_compilator_ever/tests/test0
+int f(int x, int y)
+{
+return (x+y);
+};
+int notcharacter;
+int main()
+{
+int lol;
+int k;
+int c;
+(c=2);
+{
+int c;
+(c=3);
+int olo;
+(olo=4);
+int hehe;
+(hehe=5);
+int ajgs;
+(ajgs=6);
+int priv;
+(priv=7);
+int kek;
+(kek=8);
+int a;
+(a=9);
+(kek=(c=(((olo/hehe)+(ajgs*priv))|((a-kek)&lol))));
+};
+(k=(1+(((-2)*3254)/(c=1))));
+int a;
+(a=2);
+int b;
+(b=2);
+(c=f(a, b));
+return 0;
+};
+
+======TESTING::../the_best_compilator_ever/tests/test1
+int write(int fd, char* buf, int count)
+{
+asm {
+mov rax, 4
+xor rbx, rbx
+xor rdx, rdx
+mov ebx, dword[rsb + 8]
+mov rcx, qword[rsb + 12]
+mov edx, dword[rsb + 20]
+syscall
+};
+return;
+};
+struct lol {
+int x;
+int y;
+void f()
+{
+return;
+}
+int xex(int x, int y)
+{
+return (x+y);
+}
+}
+;
+struct lol2 {
+lol x;
+}
+;
+int main()
+{
+int a[333];
+int b[((a[2]+(a[32]/a[2]))+123)];
+write(b[b[b[b[2]]]], "kek", (b[222]+a[b[2]]));
+while (((a[1]+a[2])!=0)) {
+if (((a[1]+a[2])==123)) break; else continue;
+continue;
+};
+lol* LOL;
+(LOL)->xex(1, 2);
+((*LOL)).xex(3, 4);
+((((*LOL)).x)+(((*LOL)).x));
+((LOL)->y);
+lol2 LOL2;
+((((LOL2).x)).x);
+};
+
+======TESTING::../the_best_compilator_ever/tests/test2
+int fib(int n)
+{
+if ((n<2)) return 1;
+return (fib((n-1))+fib((n-2)));
+};
+int main()
+{
+int res = fib(10);
+int id = 10;
+int f[(id+1)];
+(f[0]=(f[1]=1));
+for (int i = 2;(i<=id);(i=(i+1))) (f[i]=(f[(i-1)]+f[(i-2)]));
+return 0;
+};
+
+======TESTING::../the_best_compilator_ever/tests/test3
+int one()
+{
+return 1;
+};
+int ten()
+{
+return 10;
+};
+int s(int n)
+{
+return n;
+};
+int main()
+{
+int f[10];
+(f[0]=one());
+for (int i = one();(i<one());(i=s((i+1)))) {
+};
+return 0;
+};
+

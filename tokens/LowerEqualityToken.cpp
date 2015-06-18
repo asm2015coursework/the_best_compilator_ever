@@ -1,0 +1,14 @@
+#include "LowerEqualityToken.h"
+
+LowerEqualityToken::LowerEqualityToken(Token *left, Token *right) {
+    this->left = left;
+    this->right = right;
+}
+
+string LowerEqualityToken::toString() {
+    return "(" + left->toString() + "<=" + right->toString() + ")";
+}
+
+string LowerEqualityToken::getType() {
+    return "LowerEquality";
+}
