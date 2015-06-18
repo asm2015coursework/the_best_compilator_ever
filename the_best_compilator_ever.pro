@@ -85,4 +85,5 @@ HEADERS += \
 OTHER_FILES += \
     tests/test0.cmm \
     tests/test1.cmm \
-    parser/ReadMe
+    parser/ReadMe \
+    libpath/io.cmm

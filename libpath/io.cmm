@@ -1,0 +1,12 @@
+int write(int fd, char* buf, int count) {
+    asm {
+        mov rax, 4
+        xor rbx, rbx
+        xor rdx, rdx
+        mov ebx, dword[rsb + 8]
+        mov rcx, qword[rsb + 12]
+        mov edx, dword[rsb + 20]
+        int 0x80
+    }
+    return;
+}

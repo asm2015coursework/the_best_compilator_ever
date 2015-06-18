@@ -385,7 +385,9 @@ Type CodeGenerator::handleOr(OrToken* token) {
 
 void CodeGenerator::handleReturn(ReturnToken* token) {
     ///нужно сделать проверку типов
-    handleToken(token->expr);
+    if (token->expr != 0) {
+        handleToken(token->expr);
+    }
     append("mov rbp, r15");
     append("mov rsp, rbp");
     append("ret");
