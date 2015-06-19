@@ -31,26 +31,26 @@ int main(int argc, char *argv[]) {
     freopen(output_file.data(), "w", stdout);
     std::cout << asm_code;
 */
-    /*Parser parser;
+    Parser parser;
     Preprocessor preproc;
-    string TEST = "test3";
+    string TEST = "test01";
 
     vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm"));
-    string output = "";//CodeGenerator::generate(tokens);
-    for (size_t i = 0; i < tokens.size(); i++) {
-        output += tokens[i]->toString() + ";\n";
-    }
-    output += '\n';
+    string output = CodeGenerator::generate(tokens);
+    //for (size_t i = 0; i < tokens.size(); i++) {
+    //    output += tokens[i]->toString() + ";\n";
+    //}
+    //output += '\n';
 
-    std::cout << output;
+    //std::cout << output;
     if (output != "") {
         fileFromString(TEST + ".asm", output);
         println(exec("yasm -felf64 -dgwarf2 "+ TEST + ".asm -o  "+ TEST + ".o"));
         println(exec("gcc "+ TEST + ".o -o " + TEST));
-    }*/
+    }
 
-    Tester t;
-    t.run_all();
+    //Tester t;
+    //t.run_all();
 
     return 0;
 }

@@ -8,3 +8,9 @@ int write(int fd, char* buf, int count) {
     }
     return;
 }
+
+int main() {
+    write(1, "Hello!", 8);
+    return 0;
+}
+

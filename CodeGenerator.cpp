@@ -44,10 +44,9 @@ map<string, size_t> types;
 CodeGenerator::CodeGenerator() {
     gotError = 0;
     if (types.size() == 0) {
-        types.insert(make_pair("int", 4));
+        types.insert(make_pair("int", 8));
         types.insert(make_pair("char", 1));
-        types.insert(make_pair("long", 8));
-        types.insert(make_pair("int", 4));
+        types.insert(make_pair("char*", 1));
     }
 }
 
@@ -73,7 +72,7 @@ void CodeGenerator::handleCode(const vector<Token*>& tokens) {
         handleToken(tokens[i]);
     }
     makeGlobalVariables();
-
+    makeStrings();
 }
 
 void CodeGenerator::handleToken(Token* token) {
@@ -96,6 +95,7 @@ void CodeGenerator::handleToken(Token* token) {
             check(Multiply)
             check(Or)
             check(Return)
+            check(String)
             check(Subtract)
             check(UnaryMinus)
             check(Variable)
@@ -118,6 +118,7 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(Multiply)
             //type_check(Mod)
             type_check(Or)
+            type_check(String)
             type_check(Subtract)
             type_check(UnaryMinus)
             type_check(Variable)
@@ -146,6 +147,13 @@ void CodeGenerator::makeGlobalVariables() {
             err("Bad type size: " + sizeToString(i->second));/// нужно что-то делать с другими типами
         }
         append(i->first + ": " + res + " 1");
+    }
+}
+
+void CodeGenerator::makeStrings() {
+    append("section .data");
+    for (map<string, string>::iterator i = strings.begin(); i != strings.end(); i++) {
+        append(i->second + ": db \'" + i->first + "\', 0");
     }
 }
 
@@ -180,7 +188,7 @@ Type CodeGenerator::handleAnd(AndToken* token) {
 }
 
 void CodeGenerator::handleAsm(AsmToken* token) {
-    append(token->code);
+    append(token->code.substr(1, token->code.length() - 2));/// for stupid AsmToken
 }
 
 Type CodeGenerator::handleAssignment(AssignmentToken* token) {
@@ -391,6 +399,14 @@ void CodeGenerator::handleReturn(ReturnToken* token) {
     append("mov rbp, r15");
     append("mov rsp, rbp");
     append("ret");
+}
+
+Type CodeGenerator::handleString(StringToken* token) {
+    if (strings.count(token->str) == 0) {
+        strings.insert(make_pair(token->str, "$str" + sizeToString(strings.size())));
+    }
+    append("mov rax, " + strings[token->str]);
+    return Type("char*");
 }
 
 Type CodeGenerator::handleSubtract(SubtractToken* token) {

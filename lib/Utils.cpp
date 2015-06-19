@@ -65,3 +65,4 @@ string offsetToString(long long n) {
     //надеюсь, при нуле будет возвращаться пустая строка
     return sstm.str();
 }
+

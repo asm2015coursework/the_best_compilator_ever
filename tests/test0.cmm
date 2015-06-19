@@ -1,12 +1,10 @@
 int write(int fd, char* buf, int count) {
     asm {
-        mov rax, 4
-        xor rbx, rbx
-        xor rdx, rdx
-        mov ebx, dword[rsb + 8]
-        mov rcx, qword[rsb + 12]
-        mov edx, dword[rsb + 20]
-        int 0x80
+        mov rax, 1
+        mov rdi, qword[rbp + 8]
+        mov rsi, qword[rbp + 16]
+        mov rdx, qword[rbp + 24]
+        syscall
     }
     return;
 }
@@ -43,6 +41,7 @@ int main() {
     int b;
     b = 2;
     c = f(a, b);
+    write(1, "Hello!", 7);
     return 0;
 }
 
