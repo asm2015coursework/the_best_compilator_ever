@@ -5,12 +5,12 @@
 
 class ConstIntToken : public Token {
 public:
-    ConstIntToken(int value);
+    ConstIntToken(long long value);
 
     virtual string toString();
     virtual string getType();
 
-    int value;
+    long long value;
 };
 
 
