@@ -429,6 +429,9 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
         if (globals.count(token->_name) > 0) {
             err("Global variable already exists: " + token->_name);
         }
+        if (token->_expr != 0) {
+            err("Can't initializate global variable");
+        }
         globals.insert(make_pair(token->_name, Type(token->_type)));
     } else {
         if (vars.back().count(token->_name) > 0) {
@@ -436,6 +439,7 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
         }
         offset += Type(token->_type).size;
         append("add rsp, " + sizeToString(Type(token->_type).size));
+        //handle _expr, then [rsp] = rax/rax/ax/al
         vars.back().insert(make_pair(token->_name, make_pair(offset, token->_type)));
     }
 }
