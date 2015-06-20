@@ -236,7 +236,7 @@ Type CodeGenerator::handleAnd(AndToken* token) {
 }
 
 void CodeGenerator::handleAsm(AsmToken* token) {
-    append(token->code.substr(1, token->code.length() - 2));/// for stupid AsmToken
+    append(token->code);
 }
 
 Type CodeGenerator::handleAssignment(AssignmentToken* token) {

@@ -173,12 +173,14 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
             string f = "";
             while (x < str.length() && isspace(str[x])) x++;
             if (str[x] != '{') throw ParsingException(x, '{', str[x]);
+            x++;
+            while (x < str.length() && isspace(str[x])) x++;
             while (x < str.length() && str[x] != '}') {
                 f += str[x];
                 x++;
             }
             if (x >= str.length()) throw ParsingException("unexpected end of file");
-            f += str[x];
+            if (str[x] != '}') throw ParsingException(x, '}', str[x]);
             x++;
             while (x < str.length() && isspace(str[x])) x++;
             return make_pair(new AsmToken(f), x);

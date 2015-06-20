@@ -5,7 +5,7 @@ AsmToken::AsmToken(string code) {
 }
 
 string AsmToken::toString() {
-    return "asm " + code;
+    return "asm {" + code + "}";
 }
 
 string AsmToken::getType() {
