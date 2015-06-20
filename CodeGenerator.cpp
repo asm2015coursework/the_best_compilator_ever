@@ -79,25 +79,39 @@ void CodeGenerator::handleToken(Token* token) {
     firstcheck(Address)
             check(Add)
             check(And)
+            //check(ArrayCall)
             check(Asm)
             check(Assignment)
             check(Block)
+            //check(Break)
+            //check(ConstChar)
             check(ConstInt)
+            //check(Continue)
             check(Dereference)
             check(Divide)
             check(Equality)
             //check(For)
             check(FunctionCall)
             check(Function)
+            check(GreaterEquality)
+            check(Greater)
             //check(If)
             check(Initialization)
+            check(LowerEquality)
+            check(Lower)
             //check(Mod)
             check(Multiply)
             check(Or)
             check(Return)
             check(String)
+            //check(StructFunctionCall)
+            //check(StructPtrFunctionCall)
+            //check(StructPtrVariable)
+            //check(Struct)
+            //check(StructVariable)
             check(Subtract)
             check(UnaryMinus)
+            check(UnaryPlus)
             check(Variable)
             //check(Xor)
     else {
@@ -110,17 +124,25 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(Add)
             type_check(And)
             type_check(Assignment)
+            //type_check(ConstChar)
             type_check(ConstInt)
             //check(Dereference)
             type_check(Divide)
             type_check(Equality)
             type_check(FunctionCall)
-            type_check(Multiply)
+            type_check(GreaterEquality)
+            type_check(Greater)
+            type_check(LowerEquality)
+            type_check(Lower)
             //type_check(Mod)
+            type_check(Multiply)
+            type_check(NotEquality)
+            type_check(Not)
             type_check(Or)
             type_check(String)
             type_check(Subtract)
             type_check(UnaryMinus)
+            type_check(UnaryPlus)
             type_check(Variable)
             //type_check(Xor)
     else {
@@ -158,7 +180,33 @@ void CodeGenerator::makeStrings() {
 }
 
 Type CodeGenerator::handleAddress(AddressToken* token) {
-
+    if (token->expr->getType() == "Variable") {
+        VariableToken* vartoken = (VariableToken*)token->expr;
+        for (int i = (int)vars.size() - 1; i >= 0; i--) {
+            if (vars[i].count(vartoken->_name) == 1) {
+                long long var_offset = vars[i][vartoken->_name].first;
+                string type = vars[i][vartoken->_name].second;
+                append("mov rax, rbp");
+                append("add rax, " + offsetToString(var_offset));
+                return Type(type + "*");
+            }
+        }
+        if (globals.count(vartoken->_name) == 1) {
+            append("mov rax, " + vartoken->_name);
+            return Type(type + "*");
+        }
+        type_err("handleAddress: Unknow variable: " + vartoken->_name);
+    }
+    else if (token->expr->getType() == "Dereference") {
+        DereferenceToken* token = (DereferenceToken*)token->expr;
+        if (token->getType() == "Variable") {
+            return handleVariable((VariableToken*)token->expr);
+        }
+        type_err("handleAddress: Wrong token of Dereference");
+    }
+    else {
+        type_err("handleAddress: Wrong token");
+    }
 }
 
 Type CodeGenerator::handleAdd(AddToken* token) {
@@ -272,7 +320,16 @@ Type CodeGenerator::handleDivide(DivideToken* token) {
 }
 
 Type CodeGenerator::handleEquality(EqualityToken* token) {
-
+    ///нужно сделать нормальную проверку типов
+    Type l = handleTypeToken(token->left);
+    append("push rax");
+    Type r = handleTypeToken(token->right);
+    append("pop rdx");
+    append("mov rbx, rax");
+    append("xor rax, rax");
+    append("cmp rdx, rbx");
+    append("sete al");
+    return Type("int");
 }
 
 //void CodeGenerator::handleFor(ForToken* token);
@@ -345,6 +402,32 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
     vars.clear();
 }
 
+Type CodeGenerator::handleGreaterEquality(GreaterEqualityToken* token) {
+    ///нужно сделать нормальную проверку типов
+    Type l = handleTypeToken(token->left);
+    append("push rax");
+    Type r = handleTypeToken(token->right);
+    append("pop rdx");
+    append("mov rbx, rax");
+    append("xor rax, rax");
+    append("cmp rdx, rbx");
+    append("setnle al");
+    return Type("int");
+}
+
+Type CodeGenerator::handleGreater(GreaterToken* token) {
+    ///нужно сделать нормальную проверку типов
+    Type l = handleTypeToken(token->left);
+    append("push rax");
+    Type r = handleTypeToken(token->right);
+    append("pop rdx");
+    append("mov rbx, rax");
+    append("xor rax, rax");
+    append("cmp rdx, rbx");
+    append("setnlt al");
+    return Type("int");
+}
+
 //void CodeGenerator::handleIf(IfToken* token);
 
 void CodeGenerator::handleInitialization(InitializationToken* token) {/// не хватает присвоения
@@ -363,6 +446,32 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
     }
 }
 
+Type CodeGenerator::handleLowerEquality(LowerEqualityToken* token) {
+    ///нужно сделать нормальную проверку типов
+    Type l = handleTypeToken(token->left);
+    append("push rax");
+    Type r = handleTypeToken(token->right);
+    append("pop rdx");
+    append("mov rbx, rax");
+    append("xor rax, rax");
+    append("cmp rdx, rbx");
+    append("setle al");
+    return Type("int");
+}
+
+Type CodeGenerator::handleLower(LowerToken* token) {
+    ///нужно сделать нормальную проверку типов
+    Type l = handleTypeToken(token->left);
+    append("push rax");
+    Type r = handleTypeToken(token->right);
+    append("pop rdx");
+    append("mov rbx, rax");
+    append("xor rax, rax");
+    append("cmp rdx, rbx");
+    append("setlt al");
+    return Type("int");
+}
+
 Type CodeGenerator::handleMultiply(MultiplyToken* token) {
     ///нужно сделать нормальную проверку типов!!!
     Type l = handleTypeToken(token->left);
@@ -375,6 +484,28 @@ Type CodeGenerator::handleMultiply(MultiplyToken* token) {
         type_err("Wrong types");
     }
     return res;
+}
+
+Type CodeGenerator::handleNotEquality(NotEqualityToken* token) {
+    ///нужно сделать нормальную проверку типов
+    Type l = handleTypeToken(token->left);
+    append("push rax");
+    Type r = handleTypeToken(token->right);
+    append("pop rdx");
+    append("mov rbx, rax");
+    append("xor rax, rax");
+    append("cmp rdx, rbx");
+    append("setne al");
+    return Type("int");
+}
+
+Type CodeGenerator::handleNot(NotToken* token) {
+    Type l = handleTypeToken(token->expr);
+    if (!l.isDefault()) {
+        type_err("Not: wrong type");
+    }
+    append("xor rax, 0");
+    return Type("int");
 }
 
 Type CodeGenerator::handleOr(OrToken* token) {

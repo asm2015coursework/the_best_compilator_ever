@@ -35,12 +35,12 @@ class CodeGenerator {
     Type handleAddress(AddressToken*);
     Type handleAdd(AddToken*);//result in RAX
     Type handleAnd(AndToken*);//result in RAX
-    //void handleArrayCall(ArrayCAllToken*);
+    //void handleArrayCall(ArrayCallToken*);
     void handleAsm(AsmToken*);
     Type handleAssignment(AssignmentToken*);
     void handleBlock(BlockToken*);
     //void handleBreak(BreakToken*);
-    //void handleConstChar(ConstCharToken*);
+    //Type handleConstChar(ConstCharToken*);
     Type handleConstInt(ConstIntToken*);
     //void handleContinue(ContinueToken*);
     Type handleDereference(DereferenceToken*);
@@ -49,14 +49,16 @@ class CodeGenerator {
     //void handleFor(ForToken*);
     Type handleFunctionCall(FunctionCallToken*);
     void handleFunction(FunctionToken*);
+    Type handleGreaterEquality(GreaterEqualityToken*);
+    Type handleGreater(GreaterToken*);
     void handleIf(IfToken*);
     void handleInitialization(InitializationToken*);
-    //void handleLowerEquality(LowerEqualityToken*);
-    //void handleLower(LowerToken*);
+    Type handleLowerEquality(LowerEqualityToken*);
+    Type handleLower(LowerToken*);
     Type handleMod(ModToken*);
     Type handleMultiply(MultiplyToken*);
-    //void handleNotEquality(NotEqualityToken*);
-    //void handleNot(NotToken*);
+    Type handleNotEquality(NotEqualityToken*);
+    Type handleNot(NotToken*);
     Type handleOr(OrToken*);//result in RAX
     void handleReturn(ReturnToken*);
     Type handleString(StringToken*);
