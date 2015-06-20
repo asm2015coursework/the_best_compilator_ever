@@ -22,9 +22,9 @@ struct Type {
         return 0;
     }
 
-    bool isLink() const {
-        return name.back() == '&';
-    }
+    //bool isLink() const {
+    //    return name.back() == '&';
+    //}
 
     size_t isPointer() const {
         for (int i = name.length() - 1; i >= 0; i--) {
@@ -37,7 +37,7 @@ struct Type {
 
     Type(const string &name) {
         this->name = name;
-        if (isPointer() > 0 || isLink()) {
+        if (isPointer() > 0/* || isLink()*/) {
             size = 8;
         } else if (isDefault()) {
             if (name.substr(0, 3) == "int") {
@@ -91,7 +91,9 @@ struct Type {
         }
     }
 
-
+    Type toPointer() {
+        return Type(this->name + "*");
+    }
 
 
 };

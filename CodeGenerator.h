@@ -13,13 +13,12 @@ using std::vector;
 using std::map;
 
 class CodeGenerator {
-    static map<string, size_t> typeSize;
     bool gotError;
     string error;
     string code;
     int depth;
-    map<string, long long> globals;
-    vector<map<string, pair<long long, string> > > vars;//<name, <offset from rsb, type> >
+    map<string, Type> globals;
+    vector<map<string, pair<long long, Type> > > vars;//<name, <offset from rsb, type> >
     map<string, string> strings;//<string, name in .data section>
     long long offset;
     map<string, Type> functions;

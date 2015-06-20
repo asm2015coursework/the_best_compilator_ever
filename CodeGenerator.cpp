@@ -37,17 +37,9 @@ using std::make_pair;
         gotError = 1;\
         return Type()
 
-#define types CodeGenerator::typeSize
-
-map<string, size_t> types;
 
 CodeGenerator::CodeGenerator() {
     gotError = 0;
-    if (types.size() == 0) {
-        types.insert(make_pair("int", 8));
-        types.insert(make_pair("char", 1));
-        types.insert(make_pair("char*", 1));
-    }
 }
 
 void CodeGenerator::append(const string& s) {
@@ -154,19 +146,19 @@ Type CodeGenerator::handleTypeToken(Token* token) {
 void CodeGenerator::makeGlobalVariables() {
     append("section .bss");
     string res;
-    for (map<string, long long>::iterator i = globals.begin(); i != globals.end(); i++) {
-        if (i->second == 1) {
+    for (map<string, Type>::iterator i = globals.begin(); i != globals.end(); i++) {
+        if (i->second.size == 1) {
             res = "resb";
-        } else if (i->second == 2) {
+        } else if (i->second.size == 2) {
             res = "resw";
-        } else if (i->second == 4) {
+        } else if (i->second.size == 4) {
             res = "resd";
-        } else if (i->second == 8) {
+        } else if (i->second.size == 8) {
             res = "resq";
         }/* else if (i->second == 10) {
             res = "rest";
         }*/ else {
-            err("Bad type size: " + sizeToString(i->second));/// нужно что-то делать с другими типами
+            err("Bad type size: " + sizeToString(i->second.size));/// нужно что-то делать с другими типами
         }
         append(i->first + ": " + res + " 1");
     }
@@ -185,15 +177,15 @@ Type CodeGenerator::handleAddress(AddressToken* token) {
         for (int i = (int)vars.size() - 1; i >= 0; i--) {
             if (vars[i].count(vartoken->_name) == 1) {
                 long long var_offset = vars[i][vartoken->_name].first;
-                string type = vars[i][vartoken->_name].second;
+                Type type = vars[i][vartoken->_name].second;
                 append("mov rax, rbp");
                 append("add rax, " + offsetToString(var_offset));
-                return Type(type + "*");
+                return Type(type.toPointer());
             }
         }
         if (globals.count(vartoken->_name) == 1) {
             append("mov rax, " + vartoken->_name);
-            return Type(type + "*");
+            return Type(globals[vartoken->_name].toPointer());
         }
         type_err("handleAddress: Unknow variable: " + vartoken->_name);
     }
@@ -245,19 +237,19 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
     if (token->left->getType() == "Variable") {
         ///нужно запилить другие типы
         long long var_offset;
-        string type;
+        Type type;
         string name = ((VariableToken*)(token->left))->_name;
         for (int i = (int)vars.size() - 1; i >= 0; i--) {
             if (vars[i].count(name) == 1) {
                 var_offset = vars[i][name].first;
                 type = vars[i][name].second;
-                if (types[type] == 1) {
+                if (type.size == 1) {
                     append("mov byte[rbp " + offsetToString(var_offset) + "], al");
-                } else if (types[type] == 2) {
+                } else if (type.size == 2) {
                     append("mov word[rbp " + offsetToString(var_offset) + "], ax");
-                } else if (types[type] == 4) {
+                } else if (type.size == 4) {
                     append("mov dword[rbp " + offsetToString(var_offset) + "], eax");
-                } else if (types[type] == 8) {
+                } else if (type.size == 8) {
                     append("mov qword[rbp " + offsetToString(var_offset) + "], rax");
                 } else {
                     type_err("Wrong type's size of variable: " + name);
@@ -266,13 +258,14 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
             }
         }
         if (globals.count(name) == 1) {
-            if (types[type] == 1) {
+            Type type = globals[name];
+            if (type.size == 1) {
                 append("mov byte[" + name + "], al");
-            } else if (types[type] == 2) {
+            } else if (type.size == 2) {
                 append("mov word[" + name + "], ax");
-            } else if (types[type] == 4) {
+            } else if (type.size == 4) {
                 append("mov dword[" + name + "], eax");
-            } else if (types[type] == 8) {
+            } else if (type.size == 8) {
                 append("mov qword[" + name+ "], rax");
             } else {
                 type_err("Wrong type's size of variable: " + name);
@@ -287,7 +280,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
 
 void CodeGenerator::handleBlock(BlockToken* token) {
     size_t vars_depth = vars.size();
-    vars.push_back(map<string, pair<long long, string> >());
+    vars.push_back(map<string, pair<long long, Type> >());
     for (size_t i = 0; i < token->_commands.size(); i++) {
         handleToken(token->_commands[i]);
     }
@@ -368,29 +361,30 @@ Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
 }
 
 void CodeGenerator::handleFunction(FunctionToken* token) {
+    ///сделать проверку типов
     if (vars.size() > 0) {
         err("Can't initializate function here");
     }
-    if (types.count(token->_type) == 0) {
+    /*if (types.count(token->_type) == 0) {
         err("wrong function type: " + token->_type);
     }
     for (size_t i = 0; i < token->_args.size(); i++) {
         if (types.count(token->_args[i]._type) == 0) {
             err("wrong function's parameter type: " + token->_args[i]._type);
         }
-    }
+    }*/
     functions.insert(make_pair(token->_name, Type(token->_type)));
     offset = 8;
     append(token->_name + ":");
     append("mov r15, rbp");
     append("mov rbp, rsp");
-    vars.push_back(map<string, pair<long long, string> >());
+    vars.push_back(map<string, pair<long long, Type> >());
     for (size_t i = 0; i < token->_args.size(); i++) {
         if (vars[0].count(token->_args[i]._name) > 0) {
             err("function's argument is already used: " + token->_type);
         }
         vars[0].insert(make_pair(token->_args[i]._name, make_pair(offset, token->_args[i]._type)));
-        offset += types[token->_args[i]._type];
+        offset += Type(token->_args[i]._type).size;
     }
     offset = 0;
     handleBlock(token->_body);
@@ -435,13 +429,13 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
         if (globals.count(token->_name) > 0) {
             err("Global variable already exists: " + token->_name);
         }
-        globals.insert(make_pair(token->_name, types[token->_type]));
+        globals.insert(make_pair(token->_name, Type(token->_type)));
     } else {
         if (vars.back().count(token->_name) > 0) {
             err("Variable already exists: " + token->_name);
         }
-        offset += types[token->_type];
-        append("add rsp, " + sizeToString(types[token->_type]));
+        offset += Type(token->_type).size;
+        append("add rsp, " + sizeToString(Type(token->_type).size));
         vars.back().insert(make_pair(token->_name, make_pair(offset, token->_type)));
     }
 }
@@ -570,21 +564,21 @@ Type CodeGenerator::handleUnaryPlus(UnaryPlusToken* token) {
 Type CodeGenerator::handleVariable(VariableToken* token) {
     ///запилить не через жопу
     long long var_offset;
-    string type;
+    Type type;
     for (int i = (int)vars.size() - 1; i >= 0; i--) {
         if (vars[i].count(token->_name) == 1) {
             var_offset = vars[i][token->_name].first;
             type = vars[i][token->_name].second;
-            if (types[type] == 1) {
+            if (type.size == 1) {
                 append("xor rax, rax");
                 append("mov al, byte[rbp " + offsetToString(var_offset) + "]");
-            } else if (types[type] == 2) {
+            } else if (type.size == 2) {
                 append("xor rax, rax");
                 append("mov ax, word[rbp " + offsetToString(var_offset) + "]");
-            } else if (types[type] == 4) {
+            } else if (type.size == 4) {
                 append("xor rax, rax");
                 append("mov eax, dword[rbp " + offsetToString(var_offset) + "]");
-            } else if (types[type] == 8) {
+            } else if (type.size == 8) {
                 append("mov rax, qword[rbp " + offsetToString(var_offset) + "]");
             } else {
                 type_err("Wrong type's size of variable: " + token->_name);
@@ -593,16 +587,17 @@ Type CodeGenerator::handleVariable(VariableToken* token) {
         }
     }
     if (globals.count(token->_name) == 1) {
-        if (types[type] == 1) {
+        Type type = globals[token->_name];
+        if (type.size == 1) {
             append("xor rax, rax");
             append("mov al, byte[" + token->_name + "]");
-        } else if (types[type] == 2) {
+        } else if (type.size == 2) {
             append("xor rax, rax");
             append("mov ax, word[" + token->_name + "]");
-        } else if (types[type] == 4) {
+        } else if (type.size == 4) {
             append("xor rax, rax");
             append("mov eax, dword[" + token->_name + "]");
-        } else if (types[type] == 8) {
+        } else if (type.size == 8) {
             append("mov rax, qword[" + token->_name+ "]");
         } else {
             type_err("Wrong type's size of variable: " + token->_name);
