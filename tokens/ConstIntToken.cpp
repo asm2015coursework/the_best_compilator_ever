@@ -1,6 +1,6 @@
 #include "ConstIntToken.h"
 
-ConstIntToken::ConstIntToken(int value) {
+ConstIntToken::ConstIntToken(long long value) {
     this->value = value;
 }
 
