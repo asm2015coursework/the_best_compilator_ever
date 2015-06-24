@@ -8,6 +8,7 @@ using std::string;
 struct Type {
     string name;
     size_t size;
+    size_t length;
 
     bool isDefault() const {
         if (name.substr(0, 3) == "int") {
@@ -37,6 +38,7 @@ struct Type {
 
     Type(const string &name) {
         this->name = name;
+        length = 0;
         if (isPointer() > 0/* || isLink()*/) {
             size = 8;
         } else if (isDefault()) {
@@ -55,15 +57,16 @@ struct Type {
     Type(const string &name, size_t size) {
         this->name = name;
         this->size = size;
+        length = 0;
     }
 
     Type() {
         this->name = "error";
         this->size = 0;
+        length = 0;
     }
 
     bool setMax(const Type &a, const Type &b) {
-        /// запилить ссылки
         if (!a.isDefault() || !a.isDefault()) {
             return 0;
         }
@@ -95,6 +98,14 @@ struct Type {
         return Type(this->name + "*");
     }
 
+    Type setLength(size_t length) {
+        this->length = length;
+        return *this;
+    }
+
+    void dereference() {
+        name.pop_back();
+    }
 
 };
 

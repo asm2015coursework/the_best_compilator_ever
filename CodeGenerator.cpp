@@ -190,7 +190,7 @@ Type CodeGenerator::handleAddress(AddressToken* token) {
         type_err("handleAddress: Unknow variable: " + vartoken->_name);
     }
     else if (token->expr->getType() == "Dereference") {
-        DereferenceToken* token = (DereferenceToken*)token->expr;
+        DereferenceToken* token = (DereferenceToken*)(token->expr);
         if (token->getType() == "Variable") {
             return handleVariable((VariableToken*)token->expr);
         }
@@ -294,7 +294,30 @@ Type CodeGenerator::handleConstInt(ConstIntToken* token) {
 }
 
 Type CodeGenerator::handleDereference(DereferenceToken* token) {
-
+    Type l = handleTypeToken(token);
+    if (l.isPointer() == 0) {
+        type_err("handleDereference: there is no pointer");
+    }
+    if (l.size == 1) {
+        append("xor rax, rax");
+        append("mov al, byte[rax]");
+    }
+    else if (l.size == 2) {
+        append("xor rax, rax");
+        append("mov ax, word[rax]");
+    }
+    else if (l.size == 4) {
+        append("xor rax, rax");
+        append("mov eax, dword[rax]");
+    }
+    else if (l.size == 8) {
+        append("mov rax, qword[rax]");
+    }
+    else {
+        type_err("handleDereference: wrong type");
+    }
+    l.dereference();
+    return l;
 }
 
 Type CodeGenerator::handleDivide(DivideToken* token) {
@@ -389,8 +412,8 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
     offset = 0;
     handleBlock(token->_body);
     if (token->_body->_commands.back()->getType() != "Return") {
-        append("mov rbp, r15");
         append("mov rsp, rbp");
+        append("mov rbp, r15");
         append("ret");
     }
     vars.clear();
@@ -432,15 +455,59 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
         if (token->_expr != 0) {
             err("Can't initializate global variable");
         }
-        globals.insert(make_pair(token->_name, Type(token->_type)));
-    } else {
+        if (token->_size == 0) {
+            globals.insert(make_pair(token->_name, Type(token->_type)));
+        }
+        else if (token->_size->getType() == "ConstInt" && ((ConstIntToken*)(token->_size))->value > 0){
+            globals.insert(make_pair(token->_name, Type(token->_type).toPointer().setLength(((ConstIntToken*)(token->_size))->value)));
+        }
+        else {
+            err("handleInitialization: wrong size of array:" + token->_name);
+        }
+    }
+    else {
         if (vars.back().count(token->_name) > 0) {
             err("Variable already exists: " + token->_name);
         }
-        offset += Type(token->_type).size;
-        append("add rsp, " + sizeToString(Type(token->_type).size));
-        //handle _expr, then [rsp] = rax/rax/ax/al
-        vars.back().insert(make_pair(token->_name, make_pair(offset, token->_type)));
+        if (token->_size == 0) {
+            offset += Type(token->_type).size;
+            vars.back().insert(make_pair(token->_name, make_pair(offset, Type(token->_type))));
+            append("sub rsp, " + sizeToString(Type(token->_type).size));
+            if (token->_expr != 0) {
+                Type r = handleTypeToken(token->_expr);
+                Type l(token->_type);
+                Type res = l;
+                if (l.name != r.name && res.setMax(l, r) == 0) {
+                    err("InitializationToken: wrong types: " + l.name + ", " + r.name);
+                }
+                if (res.size == 1) {
+                    append("mov byte[rsp], al");
+                } else if (res.size == 2) {
+                    append("mov word[rsp], ax");
+                } else if (res.size == 4) {
+                    append("mov dword[rsp], eax");
+                } else if (res.size == 8) {
+                    append("mov qword[rsp], rax");
+                } else {
+                    err("InitializationToken: Wrong type's size of variable: " + token->_name);
+                }
+            }
+        }
+        else {
+            if (token->_expr != 0) {
+                err("Initialization token: cant init array");
+            }
+            if (token->_size->getType() == "ConstInt" && ((ConstIntToken*)(token->_size))->value > 0){
+                size_t cursize = Type(token->_type).size * ((ConstIntToken*)(token->_size))->value;
+                offset += cursize;
+                append("sub rsp, " + sizeToString(cursize));
+
+                globals.insert(make_pair(token->_name, Type(token->_type).toPointer().setLength(((ConstIntToken*)(token->_size))->value)));
+            }
+            else {
+                err("handleInitialization: wrong size of array:" + token->_name);
+            }
+        }
     }
 }
 
@@ -525,8 +592,8 @@ void CodeGenerator::handleReturn(ReturnToken* token) {
     if (token->expr != 0) {
         handleToken(token->expr);
     }
-    append("mov rbp, r15");
     append("mov rsp, rbp");
+    append("mov rbp, r15");
     append("ret");
 }
 

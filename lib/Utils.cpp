@@ -58,7 +58,7 @@ string intToString(int n) {
 string offsetToString(long long n) {
     std::stringstream sstm;
     if (n > 0) {
-        sstm << "+ " << n;
+        sstm << "- " << n;
     } else if (n < 0) {
         sstm << n;
     }
