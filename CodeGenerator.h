@@ -11,7 +11,8 @@
 using std::string;
 using std::vector;
 using std::map;
-
+//to do:
+//в присваивании сделать arraycall и &
 class CodeGenerator {
     bool gotError;
     string error;
@@ -34,7 +35,7 @@ class CodeGenerator {
     Type handleAddress(AddressToken*);
     Type handleAdd(AddToken*);//result in RAX
     Type handleAnd(AndToken*);//result in RAX
-    //void handleArrayCall(ArrayCallToken*);
+    Type handleArrayCall(ArrayCallToken*);
     void handleAsm(AsmToken*);
     Type handleAssignment(AssignmentToken*);
     void handleBlock(BlockToken*);

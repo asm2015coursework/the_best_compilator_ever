@@ -126,4 +126,3 @@ OTHER_FILES += \
     tests/test3.cmm \
     tester/log.txt \
     tests/test01.cmm
-

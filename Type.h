@@ -36,9 +36,7 @@ struct Type {
         return 0;//Error!
     }
 
-    Type(const string &name) {
-        this->name = name;
-        length = 0;
+    void setSize() {
         if (isPointer() > 0/* || isLink()*/) {
             size = 8;
         } else if (isDefault()) {
@@ -52,6 +50,12 @@ struct Type {
         } else {
             //size = ///запилить структуры
         }
+    }
+
+    Type(const string &name) {
+        this->name = name;
+        length = 0;
+        setSize();
     }
 
     Type(const string &name, size_t size) {
@@ -100,11 +104,13 @@ struct Type {
 
     Type setLength(size_t length) {
         this->length = length;
+        setSize();
         return *this;
     }
 
     void dereference() {
         name.pop_back();
+        setSize();
     }
 
 };
