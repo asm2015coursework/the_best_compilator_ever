@@ -12,12 +12,14 @@ using std::string;
 using std::vector;
 using std::map;
 //to do:
-//в присваивании сделать arraycall и &
+//в присваивании сделать &
 class CodeGenerator {
     bool gotError;
     string error;
     string code;
-    int depth;
+    size_t if_count;
+    size_t cycle_count;
+    vector<size_t> cycles;
     map<string, Type> globals;
     vector<map<string, pair<long long, Type> > > vars;//<name, <offset from rsb, type> >
     map<string, string> strings;//<string, name in .data section>
@@ -39,14 +41,14 @@ class CodeGenerator {
     void handleAsm(AsmToken*);
     Type handleAssignment(AssignmentToken*);
     void handleBlock(BlockToken*);
-    //void handleBreak(BreakToken*);
+    void handleBreak(BreakToken*);
     //Type handleConstChar(ConstCharToken*);
     Type handleConstInt(ConstIntToken*);
-    //void handleContinue(ContinueToken*);
+    void handleContinue(ContinueToken*);
     Type handleDereference(DereferenceToken*);
     Type handleDivide(DivideToken*);//result in RAX
     Type handleEquality(EqualityToken*);//result in RAX
-    //void handleFor(ForToken*);
+    void handleFor(ForToken*);
     Type handleFunctionCall(FunctionCallToken*);
     void handleFunction(FunctionToken*);
     Type handleGreaterEquality(GreaterEqualityToken*);
@@ -71,7 +73,7 @@ class CodeGenerator {
     Type handleUnaryMinus(UnaryMinusToken*);//result in RAX
     Type handleUnaryPlus(UnaryPlusToken*);//do nothing, just handle next token
     Type handleVariable(VariableToken*);//result in RAX
-    //void handleWhile(WhileToken);
+    void handleWhile(WhileToken*);
     Type handleXor(XorToken*);
 
 public:

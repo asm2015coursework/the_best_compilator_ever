@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 */
     Parser parser;
     Preprocessor preproc;
-    string TEST = "test01";
+    string TEST = "test02";
 
     vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm"));
     string output = CodeGenerator::generate(tokens);

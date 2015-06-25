@@ -125,4 +125,5 @@ OTHER_FILES += \
     tests/test2.cmm \
     tests/test3.cmm \
     tester/log.txt \
-    tests/test01.cmm
+    tests/test01.cmm \
+    tests/test02.cmm

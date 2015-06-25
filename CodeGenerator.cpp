@@ -40,6 +40,8 @@ using std::make_pair;
 
 CodeGenerator::CodeGenerator() {
     gotError = 0;
+    if_count = 0;
+    cycle_count = 0;
 }
 
 void CodeGenerator::append(const string& s) {
@@ -68,6 +70,9 @@ void CodeGenerator::handleCode(const vector<Token*>& tokens) {
 }
 
 void CodeGenerator::handleToken(Token* token) {
+    if (token == 0) {
+        return;
+    }
     firstcheck(Address)
             check(Add)
             check(And)
@@ -75,19 +80,19 @@ void CodeGenerator::handleToken(Token* token) {
             check(Asm)
             check(Assignment)
             check(Block)
-            //check(Break)
+            check(Break)
             //check(ConstChar)
             check(ConstInt)
-            //check(Continue)
+            check(Continue)
             check(Dereference)
             check(Divide)
             check(Equality)
-            //check(For)
+            check(For)
             check(FunctionCall)
             check(Function)
             check(GreaterEquality)
             check(Greater)
-            //check(If)
+            check(If)
             check(Initialization)
             check(LowerEquality)
             check(Lower)
@@ -105,7 +110,8 @@ void CodeGenerator::handleToken(Token* token) {
             check(UnaryMinus)
             check(UnaryPlus)
             check(Variable)
-            //check(Xor)
+            check(While)
+            check(Xor)
     else {
         err("Unknown token type: " + token->getType());
     }
@@ -137,7 +143,7 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(UnaryMinus)
             type_check(UnaryPlus)
             type_check(Variable)
-            //type_check(Xor)
+            type_check(Xor)
     else {
         type_err("Unknown token type: " + token->getType());
     }
@@ -387,10 +393,24 @@ void CodeGenerator::handleBlock(BlockToken* token) {
     vars.resize(vars_depth);
 }
 
+void CodeGenerator::handleBreak(BreakToken* token) {
+    if (cycles.size() == 0) {
+        err("handleBreak: can't find any cycle");
+    }
+    append("jmp ._cycle_end" + sizeToString(cycles.back()));
+}
+
 Type CodeGenerator::handleConstInt(ConstIntToken* token) {
     /// что-то сделать с типом нужно
     append("mov rax, " + intToString(token->value));
     return Type("int");
+}
+
+void CodeGenerator::handleContinue(ContinueToken* token) {
+    if (cycles.size() == 0) {
+        err("handleContinue: can't find any cycle");
+    }
+    append("jmp ._cycle_start" + sizeToString(cycles.back()));
 }
 
 Type CodeGenerator::handleDereference(DereferenceToken* token) {
@@ -448,7 +468,25 @@ Type CodeGenerator::handleEquality(EqualityToken* token) {
     return Type("int");
 }
 
-//void CodeGenerator::handleFor(ForToken* token);
+void CodeGenerator::handleFor(ForToken* token) {
+   string postfix = sizeToString(cycle_count);
+   handleToken(token->expr1);
+   append("._cycle_start_next" + postfix + ":");
+   Type type = handleTypeToken(token->expr2);
+   if (!type.isDefault()) {
+       err("handleFor: wrong expr");
+   }
+   append("cmp rax, 0");
+   append("je ._cycle_end" + postfix);
+   cycles.push_back(cycle_count);
+   cycle_count++;
+   handleToken(token->cmd);
+   cycles.pop_back();
+   append("._cycle_start" + postfix + ":");//just for continue
+   handleToken(token->expr3);
+   append("jmp ._cycle_start_next" + postfix);
+   append("._cycle_end" + postfix + ":");
+}
 
 Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
     Type t;
@@ -541,11 +579,31 @@ Type CodeGenerator::handleGreater(GreaterToken* token) {
     append("mov rbx, rax");
     append("xor rax, rax");
     append("cmp rdx, rbx");
-    append("setnlt al");
+    append("setnl al");
     return Type("int");
 }
 
-//void CodeGenerator::handleIf(IfToken* token);
+
+void CodeGenerator::handleIf(IfToken* token) {
+    Type type = handleTypeToken(token->expr);
+    if (!type.isDefault()) {
+        err("handleIfToken: wrong expression");
+    }
+    string postfix = sizeToString(if_count);
+    if_count++;
+    append("cmp rax, 0");
+    append("je ._else" + postfix);
+    if (token->block1 != 0) {
+        handleToken(token->block1);
+    }
+    append("jmp ._end" + postfix);
+    append("._else" + postfix + ":");
+    if (token->block2 != 0) {
+        handleToken(token->block2);
+    }
+    append("._end" + postfix + ":");
+
+}
 
 void CodeGenerator::handleInitialization(InitializationToken* token) {/// не хватает присвоения
     if (vars.size() == 0) {//global
@@ -633,7 +691,7 @@ Type CodeGenerator::handleLower(LowerToken* token) {
     append("mov rbx, rax");
     append("xor rax, rax");
     append("cmp rdx, rbx");
-    append("setlt al");
+    append("setl al");
     return Type("int");
 }
 
@@ -783,6 +841,24 @@ Type CodeGenerator::handleVariable(VariableToken* token) {
         return Type(type);
     }
     type_err("Unknow variable: " + token->_name);
+}
+
+void CodeGenerator::handleWhile(WhileToken* token) {
+    string postfix = sizeToString(cycle_count);
+    append("._cycle_start" + postfix + ":");
+    Type type = handleTypeToken(token->expr);
+    append("cmp rax, 0");
+    append("je ._cycle_end" + postfix);
+    if (!type.isDefault()) {
+        err("handleWhile: wrong type of expr");
+    }
+    cycles.push_back(cycle_count);
+    cycle_count++;
+    handleToken(token->cmd);
+    cycles.pop_back();
+    append("jmp ._cycle_start" + postfix);
+    append("._cycle_end" + postfix + ":");
+
 }
 
 Type CodeGenerator::handleXor(XorToken *token) {
