@@ -26,6 +26,8 @@ class CodeGenerator {
     long long offset;
     map<string, Type> functions;
 
+    map<string, Struct> structs;
+
     CodeGenerator();
     void append(const string&);
     void makeGlobalVariables();
@@ -64,11 +66,11 @@ class CodeGenerator {
     Type handleOr(OrToken*);//result in RAX
     void handleReturn(ReturnToken*);
     Type handleString(StringToken*);
-    //void handleStructFunction(StructFunctionToken);
-    //void handleStructPtrFunction(StructPtrFunctionToken);
-    //void handleStructPtrVariable(StructPtrVariableToken);
-    //void handleStruct(StructToken);
-    //void handleStructVariable(StructFunctionVarialbe);
+    Type handleStructFunctionCall(StructFunctionCallToken*);
+    Type handleStructPtrFunctionCall(StructPtrFunctionCallToken*);
+    Type handleStructPtrVariable(StructPtrVariableToken*);
+    void handleStruct(StructToken*);
+    Type handleStructVariable(StructVariableToken*);
     Type handleSubtract(SubtractToken*);
     Type handleUnaryMinus(UnaryMinusToken*);//result in RAX
     Type handleUnaryPlus(UnaryPlusToken*);//do nothing, just handle next token

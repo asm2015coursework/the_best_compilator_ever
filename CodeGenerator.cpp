@@ -537,7 +537,7 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
     functions.insert(make_pair(token->_name, Type(token->_type)));
     offset = 8;
     append(token->_name + ":");
-    append("mov r15, rbp");
+    append("push rbp");
     append("mov rbp, rsp");
     vars.push_back(map<string, pair<long long, Type> >());
     for (size_t i = 0; i < token->_args.size(); i++) {
@@ -551,7 +551,7 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
     handleBlock(token->_body);
     if (token->_body->_commands.back()->getType() != "Return") {
         append("mov rsp, rbp");
-        append("mov rbp, r15");
+        append("pop rbp");
         append("ret");
     }
     vars.clear();
@@ -751,7 +751,7 @@ void CodeGenerator::handleReturn(ReturnToken* token) {
         handleToken(token->expr);
     }
     append("mov rsp, rbp");
-    append("mov rbp, r15");
+    append("pop rbp");
     append("ret");
 }
 
@@ -761,6 +761,67 @@ Type CodeGenerator::handleString(StringToken* token) {
     }
     append("mov rax, " + strings[token->str]);
     return Type("char*");
+}
+
+
+Type CodeGenerator::handleStructFunctionCall(StructFunctionCallToken*) {
+
+}
+
+Type CodeGenerator::handleStructPtrFunctionCall(StructPtrFunctionCallToken*) {
+
+}
+
+Type CodeGenerator::handleStructPtrVariable(StructPtrVariableToken*) {
+
+}
+
+void CodeGenerator::handleStruct(StructToken* token) {
+    if (structs.count(token->name) > 0) {
+        err("handleStruct: struct aleady exists" + token->name);
+    }
+    structs.insert(make_pair(token->name, Struct()));
+    Struct& cur_struct = structs[token->name];
+    InitializationToken* var;
+    size_t struct_offset = 0;
+    Type type;
+    size_t array_size;
+    for (size_t i = 0; i < token->variables.size(); i++) {
+        var = token->variables[i];
+        if (var->_expr != 0) {
+            err("handleStruct: wrong struct member: " + var->_name);
+        }
+        if (cur_struct.vars.count(var->_name) > 0) {
+            err("handleStruct: member already exists");
+        }
+        if (var->_size == 0) {
+            type = Type(var->_type);
+            struct_offset += type.size;
+            cur_struct.vars.insert(make_pair(var->_name, make_pair(struct_offset, type)));
+        }
+        else if (var->_size->getType() == "ConstInt") {
+            type = Type(var->_type);
+            array_size = ((ConstIntToken*)(var->_size))->value;
+            type.setLength(array_size);
+            struct_offset += array_size * type.size;
+            type = type.toPointer();
+            cur_struct.vars.insert(make_pair(var->_name, make_pair(struct_offset, type)));
+        }
+        else {
+            err("handleStruct: wrong array size");
+        }
+    }
+
+    FunctionToken* function;
+    for (size_t i = 0; i < token->functions.size(); i++) {
+        function = token->functions[i];
+
+    }
+}
+
+
+Type CodeGenerator::handleStructVariable(StructVariableToken*) {
+
 }
 
 Type CodeGenerator::handleSubtract(SubtractToken* token) {
