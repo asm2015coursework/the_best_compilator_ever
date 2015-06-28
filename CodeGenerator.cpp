@@ -892,6 +892,9 @@ Type CodeGenerator::handleLower(LowerToken* token) {
     }
     return Type("int");
 }
+Type CodeGenerator::handleMod(ModToken* token) {
+
+}
 
 Type CodeGenerator::handleMultiply(MultiplyToken* token) {
     Type l = handleTypeToken(token->left);
