@@ -361,13 +361,33 @@ Type CodeGenerator::handleAnd(AndToken* token) {
 }
 
 Type CodeGenerator::handleArrayCall(ArrayCallToken* token) {
-    //if ()
-    long long var_offset;
-    Type type;
-    for (int i = (int)vars.size() - 1; i >= 0; i--) {
-        if (vars[i].count(token->name) == 1) {
-            var_offset = vars[i][token->name].first;
-            type = vars[i][token->name].second;
+    if (token->name->getType() == "Variable") {
+        VariableToken* vtoken = (VariableToken*)(token->name);
+        long long var_offset;
+        Type type;
+        for (int i = (int)vars.size() - 1; i >= 0; i--) {
+            if (vars[i].count(vtoken->_name) == 1) {
+                var_offset = vars[i][vtoken->_name].first;
+                type = vars[i][vtoken->_name].second;
+                if (type.length > 0) {
+                    type.setLength(0);
+                    type.dereference();
+                    Type index = handleTypeToken(token->expr);
+                    if (!index.isDefault()) {
+                        type_err("handleArrayCall: wrong type of index");
+                    }
+                    append("mov rdx, " + sizeToString(type.size));
+                    append("mul rdx");
+                    append("add rax, rbp");
+                    append("add rax, " + offsetToString(var_offset));
+                    append("mov rax, qword[rax]");
+                    return Type(type);
+                }
+                type_err("handleArrayCall: it's not an array");
+            }
+        }
+        if (globals.count(vtoken->_name) == 1) {
+            Type type = globals[vtoken->_name];
             if (type.length > 0) {
                 type.setLength(0);
                 type.dereference();
@@ -377,33 +397,16 @@ Type CodeGenerator::handleArrayCall(ArrayCallToken* token) {
                 }
                 append("mov rdx, " + sizeToString(type.size));
                 append("mul rdx");
-                append("add rax, rbp");
-                append("add rax, " + offsetToString(var_offset));
+                append("add rax, qword[" + vtoken->_name + "]");
                 append("mov rax, qword[rax]");
                 return Type(type);
             }
             type_err("handleArrayCall: it's not an array");
-        }
-    }
-    if (globals.count(token->name) == 1) {
-        Type type = globals[token->name];
-        if (type.length > 0) {
-            type.setLength(0);
-            type.dereference();
-            Type index = handleTypeToken(token->expr);
-            if (!index.isDefault()) {
-                type_err("handleArrayCall: wrong type of index");
-            }
-            append("mov rdx, " + sizeToString(type.size));
-            append("mul rdx");
-            append("add rax, qword[" + token->name + "]");
-            append("mov rax, qword[rax]");
-            return Type(type);
-        }
-        type_err("handleArrayCall: it's not an array");
 
+        }
+        type_err("handleArrayCall: Unknow variable: " + vtoken->_name);
     }
-    type_err("handleArrayCall: Unknow variable: " + token->name);
+    type_err("handleArrayCall: wrong token");
 }
 
 void CodeGenerator::handleAsm(AsmToken* token) {
@@ -469,12 +472,36 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
     else if (token->left->getType() == "ArrayCall") {
         //нужно проверить типы
         ArrayCallToken* atoken = (ArrayCallToken*)(token->left);
-        long long var_offset;
-        Type atype;
-        for (int i = (int)vars.size() - 1; i >= 0; i--) {
-            if (vars[i].count(atoken->name) == 1) {
-                var_offset = vars[i][atoken->name].first;
-                atype = vars[i][atoken->name].second;
+        if (atoken->name->getType() == "Variable") {
+            VariableToken* vtoken = (VariableToken*)(atoken->name);
+            long long var_offset;
+            Type atype;
+            for (int i = (int)vars.size() - 1; i >= 0; i--) {
+                if (vars[i].count(vtoken->_name) == 1) {
+                    var_offset = vars[i][vtoken->_name].first;
+                    atype = vars[i][vtoken->_name].second;
+                    if (atype.length > 0) {
+                        atype.setLength(0);
+                        atype.dereference();
+                        append("push rax");
+                        Type index = handleTypeToken(atoken->expr);
+                        if (!index.isDefault()) {
+                            type_err("handleAssignment: handleArrayCall: wrong type of index");
+                        }
+                        append("mov rdx, " + sizeToString(atype.size));
+                        append("mul rdx");
+                        append("add rax, rbp");
+                        append("add rax, " + offsetToString(var_offset));
+                        append("pop rdx");
+                        append("mov qword[rax], rdx");
+                        append("mov rax, rdx");
+                        return Type(atype);
+                    }
+                    type_err("handleAssignment: handleArrayCall: it's not an array");
+                }
+            }
+            if (globals.count(vtoken->_name) == 1) {
+                Type atype = globals[vtoken->_name];
                 if (atype.length > 0) {
                     atype.setLength(0);
                     atype.dereference();
@@ -485,39 +512,17 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                     }
                     append("mov rdx, " + sizeToString(atype.size));
                     append("mul rdx");
-                    append("add rax, rbp");
-                    append("add rax, " + offsetToString(var_offset));
+                    append("add rax, qword[" + vtoken->_name + "]");
                     append("pop rdx");
                     append("mov qword[rax], rdx");
                     append("mov rax, rdx");
                     return Type(atype);
                 }
                 type_err("handleAssignment: handleArrayCall: it's not an array");
-            }
-        }
-        if (globals.count(atoken->name) == 1) {
-            Type atype = globals[atoken->name];
-            if (atype.length > 0) {
-                atype.setLength(0);
-                atype.dereference();
-                append("push rax");
-                Type index = handleTypeToken(atoken->expr);
-                if (!index.isDefault()) {
-                    type_err("handleAssignment: handleArrayCall: wrong type of index");
-                }
-                append("mov rdx, " + sizeToString(atype.size));
-                append("mul rdx");
-                append("add rax, qword[" + atoken->name + "]");
-                append("pop rdx");
-                append("mov qword[rax], rdx");
-                append("mov rax, rdx");
-                return Type(atype);
-            }
-            type_err("handleAssignment: handleArrayCall: it's not an array");
 
+            }
+            type_err("handleAssignment: Unknow variable: " + vtoken->_name);
         }
-        type_err("handleAssignment: Unknow variable: " + atoken->name);
-
     }
     else if (token->left->getType() == "Dereference") {
         type_err("Ask artur to do a* = blablalba");
