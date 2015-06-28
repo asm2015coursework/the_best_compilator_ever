@@ -17,11 +17,19 @@ string Preprocessor::preprocess(string file_name) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
     resultCode =  preprocessor.deleteComments(resultCode);
-    resultCode = preprocessor.applyIncludes(resultCode);
+    resultCode = preprocessor.applyIncludes(resultCode, "");
     return resultCode;
 }
 
-string Preprocessor::applyIncludes(string code) {
+string Preprocessor::preprocess(string file_name, string filePath) {
+    string resultCode = fileToString(file_name);
+    Preprocessor preprocessor = Preprocessor();
+    resultCode =  preprocessor.deleteComments(resultCode);
+    resultCode = preprocessor.applyIncludes(resultCode, filePath);
+    return resultCode;
+}
+
+string Preprocessor::applyIncludes(string code, string filePath) {
     const string includePointer = "#include";
     const string specialDirectory = this->includeDirectory;
     const string format = ".cmm";
@@ -42,7 +50,7 @@ string Preprocessor::applyIncludes(string code) {
             } else if (code[includePosition] == '"'){
                 includePosition++;
                 string fileName = code.substr(includePosition, code.find('"', includePosition) - includePosition);
-                string fileSource = this->preprocess(fileName);
+                string fileSource = this->preprocess(filePath + fileName, filePath + fileName.substr(0, fileName.find_last_of('/')));
                 resultCode.replace(includePositionBegin + shift, includePosition - includePositionBegin + fileName.length() + 2, fileSource);
                 shift += includePosition - includePositionBegin + fileName.length() + 2 + fileSource.length();
             }
