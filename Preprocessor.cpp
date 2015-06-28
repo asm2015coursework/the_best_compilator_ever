@@ -16,7 +16,8 @@ int Preprocessor::setIncludeDirectory(string includeDirectory) {
 string Preprocessor::preprocess(string file_name) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
-    resultCode =  preprocessor.deleteComments(resultCode);
+    resultCode = preprocessor.deleteComments(resultCode);
+
     resultCode = preprocessor.applyIncludes(resultCode, "");
     return resultCode;
 }
@@ -28,6 +29,33 @@ string Preprocessor::preprocess(string file_name, string filePath) {
     resultCode = preprocessor.applyIncludes(resultCode, filePath);
     return resultCode;
 }
+
+string Preprocessor::applyDefines(string code) {
+    const string definePointer = "#define";
+    string resultCode(code);
+    string::size_type definePositionBegin = code.find(definePointer, 0);
+    string::size_type definePosition, shift = 0;
+    while (definePositionBegin != code.npos) {
+        definePosition = definePositionBegin + definePointer.length();
+        while (code[definePosition] == ' ') {
+            definePosition++;
+        }
+        if (!this->inBrackets(code, definePositionBegin)) {
+            string::size_type constantEndPosition = code.find(' ', definePosition);
+            string constantValue = code.substr(definePosition, constantEndPosition - definePosition);
+            string::size_type macroEndPosition = code.find(' ', constantEndPosition + 1);
+            string macroValue = code.substr(constantEndPosintion + 1, macroEndPosition - constantEndPosition - 1);
+            string::size_type macroPosition = resultCode.find(macroValue);
+            while (macroPosition != resultCode.npos) {
+                resultCode.replace(macroValue, constantValue);
+                macroPosition = resultCode.find(macroValue, macroPosition);
+            }
+        }
+        definePositionBegin = code.find(definePointer, definePosition);
+    }
+    return resultCode;
+}
+
 
 string Preprocessor::applyIncludes(string code, string filePath) {
     const string includePointer = "#include";
@@ -43,16 +71,20 @@ string Preprocessor::applyIncludes(string code, string filePath) {
         }
         if (!this->inBrackets(code, includePositionBegin)) {
             if (code[includePosition] == '<') {
-                string fileName = code.substr(includePosition + 1, code.find('>', includePosition) - includePosition);
+                string::size_type fileNameEndPosition = code.find('>', includePosition);
+                string fileName = code.substr(includePosition + 1, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(specialDirectory + fileName + format);
-                resultCode.replace(includePositionBegin + shift, includePosition - includePositionBegin + fileName.length() + 2, fileSource);
-                shift += includePosition - includePositionBegin + fileName.length() + 2 + fileSource.length();
+                string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
+                resultCode.replace(includePositionBegin + shift, replaceSizeCount, fileSource);
+                shift += replaceSizeCount + fileSource.length();
             } else if (code[includePosition] == '"'){
                 includePosition++;
-                string fileName = code.substr(includePosition, code.find('"', includePosition) - includePosition);
+                string::size_type fileNameEndPosition = code.find('>', includePosition);
+                string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(filePath + fileName, filePath + fileName.substr(0, fileName.find_last_of('/')));
-                resultCode.replace(includePositionBegin + shift, includePosition - includePositionBegin + fileName.length() + 2, fileSource);
-                shift += includePosition - includePositionBegin + fileName.length() + 2 + fileSource.length();
+                string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
+                resultCode.replace(includePositionBegin + shift, replaceSizeCount, fileSource);
+                shift += replaceSizeCount + fileSource.length();
             }
         }
         includePositionBegin = code.find(includePointer, includePosition);

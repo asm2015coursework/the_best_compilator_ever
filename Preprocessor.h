@@ -14,6 +14,7 @@ public:
 private:
     string includeDirectory;
     string deleteComments(string code);
+    string applyDefines(string code);
     string applyIncludes(string code, string filePath);
     bool inBrackets(string code, int position);
 };
