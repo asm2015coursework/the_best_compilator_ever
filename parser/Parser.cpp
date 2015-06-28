@@ -523,40 +523,51 @@ pair<Token*, size_t> Parser::unaryParse(size_t x) {
 }
 
 pair<Token*, size_t> Parser::structVariableOrFunctionParse(size_t x) {
-    //StructVariableToken or StructFunctionCallToken
+    //StructVariableToken or StructFunctionCallToken OR ArrayCallToken
     pair<Token*, size_t> cur1 = constOrVariableOrFunctionParse(x);
     x = cur1.second;
-    while (x < str.length() && str[x] != ')' && str[x] != ';' && ((str[x] == '.') || (str[x] == '-' && x + 1 < str.length() && str[x + 1] == '>'))) {
-        char oprtn = str[x];
-        if (oprtn == '.') x++; else x += 2;
-        while (x < str.length() && isspace(str[x])) x++;
-        pair<string, size_t> cur2 = nameParse(x);
-        x = cur2.second;
-        vector<Token*> args;
-        if (str[x] == '(') {
-            x++;
+    while (x < str.length() && str[x] != ')' && str[x] != ';' && ((str[x] == '.') || (str[x] == '[') || (str[x] == '-' && x + 1 < str.length() && str[x + 1] == '>'))) {
+        if (str[x] == '[') {
+                   x++;
+                   while (x < str.length() && isspace(str[x])) x++;
+                   pair<Token*, size_t> p = expressionParse(x);
+                   x = p.second;
+                   if (str[x] != ']') throw ParsingException(x, ']', str[x]);
+                   x++;
+                   while (x < str.length() && isspace(str[x])) x++;
+                   cur1.first = new ArrayCallToken(cur1.first, p.first);
+        } else {
+            char oprtn = str[x];
+            if (oprtn == '.') x++; else x += 2;
             while (x < str.length() && isspace(str[x])) x++;
-            while (x < str.length() && str[x] != ')') {
-                pair<Token*, size_t> p = expressionParse(x);
-                args.push_back(p.first);
-                x = p.second;
-                if (str[x] == ')') break;
-                if (str[x] != ',') throw ParsingException("expected argument of function " + cur2.first);
+            pair<string, size_t> cur2 = nameParse(x);
+            x = cur2.second;
+            vector<Token*> args;
+            if (str[x] == '(') {
                 x++;
                 while (x < str.length() && isspace(str[x])) x++;
-            }
-            x++;
-            while (x < str.length() && isspace(str[x])) x++;
-            if (oprtn == '.') {
-                cur1.first = new StructFunctionCallToken(cur1.first, cur2.first, args);
+                while (x < str.length() && str[x] != ')') {
+                    pair<Token*, size_t> p = expressionParse(x);
+                    args.push_back(p.first);
+                    x = p.second;
+                    if (str[x] == ')') break;
+                    if (str[x] != ',') throw ParsingException("expected argument of function " + cur2.first);
+                    x++;
+                    while (x < str.length() && isspace(str[x])) x++;
+                }
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
+                if (oprtn == '.') {
+                    cur1.first = new StructFunctionCallToken(cur1.first, cur2.first, args);
+                } else {
+                    cur1.first = new StructPtrFunctionCallToken(cur1.first, cur2.first, args);
+                }
             } else {
-                cur1.first = new StructPtrFunctionCallToken(cur1.first, cur2.first, args);
-            }
-        } else {
-            if (oprtn == '.') {
-                cur1.first = new StructVariableToken(cur1.first, cur2.first);
-            } else {
-                cur1.first = new StructPtrVariableToken(cur1.first, cur2.first);
+                if (oprtn == '.') {
+                    cur1.first = new StructVariableToken(cur1.first, cur2.first);
+                } else {
+                    cur1.first = new StructPtrVariableToken(cur1.first, cur2.first);
+                }
             }
         }
     }
@@ -585,7 +596,7 @@ pair<Token*, size_t> Parser::constOrVariableOrFunctionParse(size_t x) {
             x++;
             while (x < str.length() && isspace(str[x])) x++;
             return make_pair(new FunctionCallToken(name, args), x);
-        } else if (str[p.second] == '[') {
+        } else /*if (str[p.second] == '[') {
             //ArrayCallToken
             x = p.second;
             x++;
@@ -596,7 +607,7 @@ pair<Token*, size_t> Parser::constOrVariableOrFunctionParse(size_t x) {
             x++;
             while (x < str.length() && isspace(str[x])) x++;
             return make_pair(new ArrayCallToken(name, p.first), x);
-        } else {
+        } else */{
             //VariableToken
             return variableParse(x);
         }

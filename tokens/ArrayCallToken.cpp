@@ -1,12 +1,12 @@
 #include "ArrayCallToken.h"
 
-ArrayCallToken::ArrayCallToken(string name, Token* expr) {
+ArrayCallToken::ArrayCallToken(Token* name, Token* expr) {
     this->name = name;
     this->expr = expr;
 }
 
 string ArrayCallToken::toString() {
-    string ans = name + "[" + expr->toString() + "]";
+    string ans = "(" + name->toString() + ")[" + expr->toString() + "]";
     return ans;
 }
 

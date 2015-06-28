@@ -9,10 +9,13 @@ StructPtrFunctionCallToken::StructPtrFunctionCallToken(Token* expr, string name,
 
 string StructPtrFunctionCallToken::toString() {
     string ans = "(" + expr->toString() + ")->" + name + "(";
-    for (size_t i = 0; i < args.size() - 1; i++) {
-        ans += args[i]->toString() + ", ";
-    }
-    ans += args[args.size() - 1]->toString() + ")";
+    if (args.size() > 0) {
+        for (size_t i = 0; i < args.size() - 1; i++) {
+            ans += args[i]->toString() + ", ";
+        }
+        ans += args[args.size() - 1]->toString();
+    }    
+    ans += ")";
     return ans;
 }
 
