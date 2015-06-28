@@ -78,8 +78,9 @@ string Preprocessor::applyIncludes(string code, string filePath) {
         }
         if (!this->inBrackets(code, includePositionBegin)) {
             if (code[includePosition] == '<') {
+                includePosition++;
                 string::size_type fileNameEndPosition = code.find('>', includePosition);
-                string fileName = code.substr(includePosition + 1, fileNameEndPosition - includePosition);
+                string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(specialDirectory + fileName + format);
                 string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
                 resultCode.replace(includePositionBegin + shift, replaceSizeCount, fileSource);
