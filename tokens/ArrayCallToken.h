@@ -5,12 +5,12 @@
 
 class ArrayCallToken : public Token {
 public:
-    ArrayCallToken(string name, Token* expr);
+    ArrayCallToken(Token* name, Token* expr);
 
     virtual string toString();
     virtual string getType();
 
-    string name;
+    Token* name;
     Token* expr;
 };
 
