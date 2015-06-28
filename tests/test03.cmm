@@ -22,6 +22,7 @@ syscall
 
 
 struct S {
+    int b;
     int a;
     void set(int b) {
         this->a = b;
@@ -30,13 +31,14 @@ struct S {
     int get() {
         return this->a;
     }
+
 }
+
 
 int main() {
     S s;
     S* ps = &s;
-    //ps->set(2);
-
+    ps->set(2);
     if (ps->get() == 2) {
         write(1, "OK", 2);
     }

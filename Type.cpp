@@ -15,6 +15,9 @@ bool Type::isDefault() const {
     if (name.substr(0, 4) == "char") {
         return 1;
     }
+    if (isPointer() > 0) {
+        return 1;
+    }
     //if (name.substr(0, 4) == "long") {
     //    return 1;
     //}

@@ -553,18 +553,21 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
             genCpy(type.size);
         } else if (type.size == 1) {
             append("xor rax, rax");
-            append("mov al, byte[rsi]");
+            append("mov rdx, rsi");
+            append("mov al, dl");
             append("mov byte[rdi], al");
         } else if (type.size == 2) {
             append("xor rax, rax");
-            append("mov ax, word[rsi]");
+            append("mov rdx, rsi");
+            append("mov ax, dx");
             append("mov word[rdi], ax");
         } else if (type.size == 4) {
             append("xor rax, rax");
-            append("mov eax, dword[rsi]");
+            append("mov rdx, rsi");
+            append("mov eax, edx");
             append("mov dword[rdi], eax");
         } else if (type.size == 8) {
-            append("mov rax, qword[rsi]");
+            append("mov rax, rsi");
             append("mov qword[rdi], rax");
         }
         return Type(type);
@@ -728,7 +731,7 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
         if (vars[0].count(token->_args[i]._name) > 0) {
             err("handleFunction: function's argument is already used: " + token->_type);
         }
-        vars[0].insert(make_pair(token->_args[i]._name, make_pair(offset, token->_args[i]._type)));
+        vars[0].insert(make_pair(token->_args[i]._name, make_pair(-offset, token->_args[i]._type)));
         offset += Type(token->_args[i]._type).size;
     }
     offset = 0;
