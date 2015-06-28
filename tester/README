@@ -1,10 +1,14 @@
 u can run tests in different ways:
 
-1) run_all()
+KEYS :
 
-2) run_once(string name) // run_once("test0")
+bool withoutTokens - not to print Tokens of the Parser
 
-3) run_tests(int*a, int test_num),  where a - array of test's id, test_num - number of tests
+1) run_all(bool withoutTokens)
+
+2) run_one(string name, bool withoutTokens) // run_once("test0")
+
+3) run_tests(int *a, bool withoutTokens),  where a - array of test's id
     // int a[2] = {3, 4};
     // runt_tests(a, 2);
 
