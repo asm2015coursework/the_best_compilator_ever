@@ -5,6 +5,9 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <unistd.h>
+#include <wait.h>
+
 
 #include "../tokens/Token.h"
 #include "../Preprocessor.h"
@@ -16,7 +19,7 @@
 #include <fstream>
 #include <typeinfo>
 
-int Tester::test(string name) {
+int Tester::test(string name, bool withoutTokens) {
     try {
         Parser parser;
         Preprocessor preproc;
@@ -28,22 +31,32 @@ int Tester::test(string name) {
 
         log << "======TESTING::" + name + "\n\n---TOKENS:";
 
-
          string output = CodeGenerator::generate(tokens);
 
-         log << output;
-         log << "\n";
+         if (withoutTokens){
+            log << "KEY : WithoutTokens\nOutput is ";
+            log << (output != "" ? "not " : "") << "empty\n";
+         } else {
+            log << output << '\n';
+         }
 
          if (output != "") {
              fileFromString(name + ".asm", output);
 
              log << "-----EXECUTION\n";
-             log << (exec("yasm -felf64 -dgwarf2 "+ name + ".asm -o  "+ name + ".o"));
-             log << (exec("gcc "+ name + ".o -o " + name));
+             int f = fork();
+             if (f == 0){
+                log << (exec("yasm -felf64 -dgwarf2 "+ name + ".asm -o  "+ name + ".o")) << "\n";
+                return 1;
+             } else {
+                 int status=0;
+                 wait(&status);
+                 log << (exec("gcc "+ name + ".o -o " + name)) << "\n";
+             }
              log << "\n";
 
          } else {
-             std::cout << "\n------output == "", " + name + "\n";
+             std::cout << "\n------Parser output is empty, " + name + "\n";
              return 1;
          }
     }  catch (ParsingException& ignored){
@@ -58,29 +71,29 @@ void Tester::remove_log(){
     remove ("../the_best_compilator_ever/tester/log.txt");
 }
 
-int Tester::run_tests(int* a, int test_num){
+int Tester::run_tests(int* a, bool withoutTokens){
     int failed = 0;
     Tester::remove_log();
-    for (int i = 0; i < test_num; ++i){
-        failed += Tester::test("../the_best_compilator_ever/tests/test" + std::to_string(a[i]));
+    for (int i = 0; i < sizeof(a); ++i){
+        failed += Tester::test("../the_best_compilator_ever/tests/test" + std::to_string(a[i]), withoutTokens);
     }
     return failed;
 }
 
-int Tester::run_once(string name){
+int Tester::run_one(string name, bool withoutTokens){
     Tester::remove_log();
-    return Tester::test("../the_best_compilator_ever/tests/" + name);
+    return Tester::test("../the_best_compilator_ever/tests/" + name, withoutTokens);
 }
 
-int Tester::run_all(){
+int Tester::run_all(bool withoutTokens){
     int failed = 0;
     Tester::remove_log();
     for (int i = 0; i < 4 ; ++i){
         string name = "../the_best_compilator_ever/tests/test" + std::to_string(i);
         if (FILE *file = fopen((name+".cmm").c_str(), "r")) {
             fclose(file);
-            failed += Tester::test(name);
-        } else{
+            failed += Tester::test(name, withoutTokens);
+        } else {
             break;
         }
     }
