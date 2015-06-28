@@ -5,6 +5,7 @@
 
 class Tester{
     int test(std::string);
+    void remove_log();
 public:
     int run_all();
     int run_tests(int*, int);
