@@ -17,7 +17,7 @@ string Preprocessor::preprocess(string file_name) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
     resultCode = preprocessor.deleteComments(resultCode);
-
+    resultCode = preprocessor.applyDefines(resultCode);
     resultCode = preprocessor.applyIncludes(resultCode, "");
     return resultCode;
 }
@@ -26,6 +26,7 @@ string Preprocessor::preprocess(string file_name, string filePath) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
     resultCode =  preprocessor.deleteComments(resultCode);
+    resultCode = preprocessor.applyDefines(resultCode);
     resultCode = preprocessor.applyIncludes(resultCode, filePath);
     return resultCode;
 }
@@ -44,10 +45,10 @@ string Preprocessor::applyDefines(string code) {
             string::size_type constantEndPosition = code.find(' ', definePosition);
             string constantValue = code.substr(definePosition, constantEndPosition - definePosition);
             string::size_type macroEndPosition = code.find(' ', constantEndPosition + 1);
-            string macroValue = code.substr(constantEndPosintion + 1, macroEndPosition - constantEndPosition - 1);
+            string macroValue = code.substr(constantEndPosition + 1, macroEndPosition - constantEndPosition - 1);
             string::size_type macroPosition = resultCode.find(macroValue);
             while (macroPosition != resultCode.npos) {
-                resultCode.replace(macroValue, constantValue);
+                resultCode.replace(macroPosition, macroValue.length(), constantValue);
                 macroPosition = resultCode.find(macroValue, macroPosition);
             }
         }

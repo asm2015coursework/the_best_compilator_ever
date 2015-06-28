@@ -21,6 +21,7 @@ class CodeGenerator {
     string code;
     size_t if_count;
     size_t cycle_count;
+    size_t cpy_count;
     vector<size_t> cycles;
     map<string, Type> globals;
     vector<map<string, pair<long long, Type> > > vars;//<name, <offset from rsb, type> >
@@ -33,6 +34,7 @@ class CodeGenerator {
     void append(const string&);
     void makeGlobalVariables();
     void makeStrings();
+    void genCpy(size_t);
     void handleCode(const vector<Token*>&);
     void handleToken(Token*);
     Type handleTypeToken(Token*);
@@ -44,10 +46,10 @@ class CodeGenerator {
     void handleAsm(AsmToken*);
     Type handleAssignment(AssignmentToken*);
     void handleBlock(BlockToken*);
-    void handleBreak(BreakToken*);
+    void handleBreak();
     //Type handleConstChar(ConstCharToken*);
     Type handleConstInt(ConstIntToken*);
-    void handleContinue(ContinueToken*);
+    void handleContinue();
     Type handleDereference(DereferenceToken*);
     Type handleDivide(DivideToken*);//result in RAX
     Type handleEquality(EqualityToken*);//result in RAX
