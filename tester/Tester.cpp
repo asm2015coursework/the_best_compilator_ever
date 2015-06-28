@@ -26,25 +26,25 @@ int Tester::test(string name) {
         std::ofstream log;
         log.open ("../the_best_compilator_ever/tester/log.txt",  std::ios_base::app);
 
-        log << "======TESTING::" + name + "\n";
-         string output = "";//CodeGenerator::generate(tokens);
+        log << "======TESTING::" + name + "\n\n---TOKENS:";
 
-         for (size_t i = 0; i < tokens.size(); i++) {
-             output += tokens[i]->toString() + ";\n";
-         }
-         output += '\n';
+
+         string output = CodeGenerator::generate(tokens);
 
          log << output;
-
-         //println(output);
+         log << "\n";
 
          if (output != "") {
              fileFromString(name + ".asm", output);
 
-             //println(exec("yasm -felf64 -dgwarf2 "+ name + ".asm -o  "+ name + ".o"));
-             //println(exec("gcc "+ name + ".o -o " + name));
+             log << "-----EXECUTION\n";
+             log << (exec("yasm -felf64 -dgwarf2 "+ name + ".asm -o  "+ name + ".o"));
+             log << (exec("gcc "+ name + ".o -o " + name));
+             log << "\n";
+
          } else {
              std::cout << "\n------output == "", " + name + "\n";
+             return 1;
          }
     }  catch (ParsingException& ignored){
         std::cout << "\n------Exception " + std::string(ignored.what()) + "\n";
@@ -54,9 +54,13 @@ int Tester::test(string name) {
     return 0;
 }
 
+void Tester::remove_log(){
+    remove ("../the_best_compilator_ever/tester/log.txt");
+}
+
 int Tester::run_tests(int* a, int test_num){
     int failed = 0;
-    remove ("../the_best_compilator_ever/tester/log.txt");
+    Tester::remove_log();
     for (int i = 0; i < test_num; ++i){
         failed += Tester::test("../the_best_compilator_ever/tests/test" + std::to_string(a[i]));
     }
@@ -64,14 +68,13 @@ int Tester::run_tests(int* a, int test_num){
 }
 
 int Tester::run_once(string name){
-    remove ("../the_best_compilator_ever/tester/log.txt");
+    Tester::remove_log();
     return Tester::test("../the_best_compilator_ever/tests/" + name);
 }
 
 int Tester::run_all(){
     int failed = 0;
-    remove ("../the_best_compilator_ever/tester/log.txt");
-
+    Tester::remove_log();
     for (int i = 0; i < 4 ; ++i){
         string name = "../the_best_compilator_ever/tests/test" + std::to_string(i);
         if (FILE *file = fopen((name+".cmm").c_str(), "r")) {
