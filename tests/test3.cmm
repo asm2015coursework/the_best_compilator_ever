@@ -1,23 +1,227 @@
-int one(){
-    return 1;
-}
 
-int ten(){
-    return 10;
-}
 
-int s(int n){
-    return n;
-}
+    struct buf_t {
+        int ptr;
+        int capacity;
+        int size;
+        char* buffer;
 
-int main(){
-    int f[10];
-    f[0] = one(); // function without arguments
-    for (int i = one(); i < one(); i = s(i + 1)){ // function in cycle's head
+        buf_t* buf_new(int capacity){
+            buf_t* result = malloc(24);
+            if (!result)
+                return NULL;
+            result->ptr = 0;
+            result->capacity = capacity;
+            result->size = 0;
+            result->buffer = malloc(capacity);
+            if (!result->buffer) {
+                free(result);
+                return NULL;
+            }
+            return result;
+        }
 
+        void buf_free(buf_t* buf) {
+            free(buf->buffer);
+            free(buf);
+        }
+
+        int buf_capacity(buf_t* buf) {
+            return buf->capacity;
+        }
+
+        int buf_size(buf_t* buf) {
+            return buf->size;
+        }
+
+        int buf_fill(int fd, buf_t * buf, int required) {
+            int rc = 1;
+
+// DANGER, read >= 0, may be
+            while (buf->size < required & (rc = read(fd, buf->buffer + buf->size, buf->capacity - buf->size)) > 0)
+                buf->size = buf->size + rc;
+            if (rc < 0)
+                return -1;
+            else
+                return buf->size;
+        }
+
+        int buf_fill_once(int fd, buf_t * buf) {
+            int rc = read(fd, buf->buffer + buf->size, buf->capacity - buf->size);
+            if (rc < 0)
+                return -1;
+            else {
+                buf->size = buf->size + rc;
+                return buf->size;
+            }
+        }
+
+        int buf_flush(int fd, buf_t * buf, int required) {
+            int flushed = 0;
+            int wc;
+            while (flushed < required & flushed < buf->size & (wc = write(fd, buf->buffer, buf->size - flushed)) >= 0)
+                flushed = flushed + wc;
+            buf->size = buf->size - flushed;
+            for (int i = 0; i < buf->size; i = i + 1)
+                buf->buffer[i] = buf->buffer[i + flushed];
+            if (wc < 0)
+                return -1;
+            else
+                return wc;
+        }
+
+        int buf_getline(int fd, buf_t * buf, char* dest) {
+            for (int i = 0; i < buf->size; i = i + 1)
+                if (is_ln(buf->buffer[i])) {
+                    for (int k = 0; k < i; k = k + 1)
+                        dest[k] = buf->buffer[k];
+                    int j = 0;
+                    for (int k = i + 1; k < buf->size; k = k + 1) {
+                        buf->buffer[j] = buf->buffer[k];
+                        j = j + 1;
+                    }
+                    buf->size = buf->size - i;
+                    return i;
+                }
+            buf->size = 0;
+            while (1) {
+                int last = buf->size;
+                int rc = read(fd, buf->buffer + buf->size, buf->capacity - buf->size);
+                if (rc == 0)
+                    break;
+                if (rc < 0)
+                    return -1;
+                buf->size = buf->size + rc;
+                for (int i = last; i < buf->size; i = i + 1)
+                    if (is_ln(buf->buffer[i])) {
+                        for (int k = 0; k < i; k = k + 1)
+                            dest[k] = buf->buffer[k];
+                        int j = 0;
+                        for (int k = i + 1; k < buf->size; k = k + 1){
+                            buf->buffer[j] = buf->buffer[k];
+                            j = j + 1;
+                        }
+                        buf->size = buf->size - i;
+                        return i;
+                    }
+            }
+
+            return buf->size;
+        }
+
+        int buf_write(int fd, buf_t * buf, char* src, int len) {
+            for (int i = 0; i < len; i = i + 1) {
+                if (buf->size == buf->capacity) {
+                    int wc = write(fd, buf->buffer, buf->capacity);
+                    if (wc <= 0)
+                        return -1;
+                    for (int j = 0; j < buf->capacity - wc; j = j + 1)
+                        buf->buffer[j] = buf->buffer[j + wc];
+                    buf->size = buf->size - wc;
+                }
+                buf->size = buf->size + 1;
+                buf->buffer[buf->size - 1] = src[i];
+            }
+            return len;
+        }
+
+        void buf_clear(buf_t* buf) {
+            buf->size = 0;
+            buf->ptr = 0;
+        }
     }
 
-    for (;;);
+    buf_t *buf;
+    int fd;
 
+    int decline_input(int r_fd){
+        fd = r_fd;
+        buf = buf_new(4096);
+        return read(fd, buf->buffer, 0);
+    }
+
+    int is_digit(char c){
+        return 48 <= c & c <= 57;
+    }
+
+    int is_space(char c){
+        return c == 32;
+    }
+
+    int is_ln(char c){
+        return c == 10;
+    }
+
+    int read_int(int& a){
+        int i = buf->ptr;
+        while (1) {
+            if (i >= buf->size)
+                buf_clear(buf);
+            if (buf->size == 0 & buf_fill(fd, buf, 4096) < 0) {
+                 return -1;
+            }
+            i = buf->ptr;
+            for (i = i; i < buf->size & (is_space(buf->buffer[i]) | is_ln(buf->buffer[i])); i = i + 1) {
+
+            }
+
+            if (i < buf->size & is_digit(buf->buffer[i]))
+                break;
+            else if (i < buf->size)
+                return -1;
+        }
+
+        int res = 0;
+        for (i = i; i < buf->size; i = i + 1){
+            if (is_digit(buf->buffer[i]))
+                res = res * 10 + (buf->buffer[i] - 48);
+            else if (is_space(buf->buffer[i]) & is_ln(buf->buffer[i]))
+                break;
+            else
+                return -1;
+        }
+
+        *a = res;
+        buf->ptr = i;
+        return 0;
+    }
+
+    int read_str(char* s, int len){
+        int uk = 0;
+        char* res;
+        int i = buf->ptr;
+        while (1) {
+            if (i >= buf->size)
+                buf_clear(buf);
+            if (buf->size == 0 & buf_fill(fd, buf, 4096) < 0)
+                return -1;
+
+            for (i = buf->ptr; uk < len & i < buf->size; i = i + 1) {
+                if (is_ln(buf->buffer[i]))
+                    break;
+                else {
+                    res[uk] = buf->buffer[i];
+                    uk = uk + 1;
+                }
+            }
+
+            if (i < buf->size & is_ln(buf->buffer[i])){
+                buf->ptr = i + 1;
+                break;
+            }
+            if (uk == len) {
+                buf->ptr = i;
+                break;
+            }
+        }
+        for (int j = 0; j < uk; j = j + 1)
+            s[j] = res[j];
+        return uk;
+    }
+
+
+
+
+int main() {
     return 0;
 }
