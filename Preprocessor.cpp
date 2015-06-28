@@ -17,7 +17,7 @@ string Preprocessor::preprocess(string file_name) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
     resultCode = preprocessor.deleteComments(resultCode);
-    //resultCode = preprocessor.applyDefines(resultCode);
+    resultCode = preprocessor.applyDefines(resultCode);
     resultCode = preprocessor.applyIncludes(resultCode, "");
     return resultCode;
 }
@@ -26,12 +26,12 @@ string Preprocessor::preprocess(string file_name, string filePath) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
     resultCode =  preprocessor.deleteComments(resultCode);
-    //resultCode = preprocessor.applyDefines(resultCode);
+    resultCode = preprocessor.applyDefines(resultCode);
     resultCode = preprocessor.applyIncludes(resultCode, filePath);
     return resultCode;
 }
 
-/*string Preprocessor::applyDefines(string code) {
+string Preprocessor::applyDefines(string code) {
     const string definePointer = "#define";
     string resultCode(code);
     string::size_type definePositionBegin = code.find(definePointer, 0);
@@ -48,14 +48,14 @@ string Preprocessor::preprocess(string file_name, string filePath) {
             string macroValue = code.substr(constantEndPosition + 1, macroEndPosition - constantEndPosition - 1);
             string::size_type macroPosition = resultCode.find(macroValue);
             while (macroPosition != resultCode.npos) {
-                resultCode.replace(macroValue, constantValue);
+                resultCode.replace(macroPosition, macroValue.length(), constantValue);
                 macroPosition = resultCode.find(macroValue, macroPosition);
             }
         }
         definePositionBegin = code.find(definePointer, definePosition);
     }
     return resultCode;
-}*/
+}
 
 
 string Preprocessor::applyIncludes(string code, string filePath) {
