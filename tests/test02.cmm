@@ -1,4 +1,4 @@
-#include <io.cmm>
+#include <io>
 
 int main() {
     int i = 5;

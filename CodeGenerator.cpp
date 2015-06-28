@@ -179,6 +179,7 @@ void CodeGenerator::makeGlobalVariables() {
     append("section .bss");
     string res;
     for (map<string, Type>::iterator i = globals.begin(); i != globals.end(); i++) {
+        //if (i->second)
         if (i->second.size == 1) {
             res = "resb";
         } else if (i->second.size == 2) {
@@ -187,9 +188,7 @@ void CodeGenerator::makeGlobalVariables() {
             res = "resd";
         } else if (i->second.size == 8) {
             res = "resq";
-        }/* else if (i->second == 10) {
-            res = "rest";
-        }*/ else {
+        } else {
             err("Bad type size: " + sizeToString(i->second.size));/// нужно что-то делать с другими типами
         }
         append(i->first + ": " + res + " 1");
