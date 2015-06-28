@@ -170,9 +170,8 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(UnaryPlus)
             type_check(Variable)
             type_check(Xor)
-    else {
-        type_err("Unknown token type: " + token->getType());
-    }
+
+    type_err("Unknown token type: " + token->getType());
 }
 
 
@@ -573,9 +572,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
     else if (token->left->getType() == "StructVariable") {
         type_err("ask artur to do a.a = bla");
     }
-    else {
-        type_err("handleAssignment: wrong left token");
-    }
+    type_err("handleAssignment: wrong left token");
 }
 
 void CodeGenerator::handleBlock(BlockToken* token) {
@@ -722,7 +719,7 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
         err("Can't initializate function here");
     }
     functions.insert(make_pair(token->_name, Type(token->_type)));
-    offset = 8;
+    offset = 16;
     append(token->_name + ":");
     append("push rbp");
     append("mov rbp, rsp");
@@ -1214,7 +1211,7 @@ Type CodeGenerator::handleVariable(VariableToken* token) {
             }
             else {
                 if (!type.isDefault()) {
-                    append("rax, rbp");
+                    append("mov rax, rbp");
                     append("add rax, " + offsetToString((var_offset)));
                 }
                 if (type.size == 1) {
