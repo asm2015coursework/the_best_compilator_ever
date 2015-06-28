@@ -163,7 +163,7 @@
                 return -1;
             }
             i = buf->ptr;
-            for (i = i; i < buf->size & (is_space(buf->buffer[i]) | is_ln(buf->buffer[i]); i = i + 1) {
+            for (i = i; i < buf->size & (is_space(buf->buffer[i]) | is_ln(buf->buffer[i])); i = i + 1) {
 
             }
 
