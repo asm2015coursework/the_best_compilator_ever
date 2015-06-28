@@ -1,26 +1,5 @@
-int write(int fd, char* buf, int count) {
-    asm {
-mov rax, 1
-mov rdi, qword[rbp + 16]
-mov rsi, qword[rbp + 24]
-mov rdx, qword[rbp + 32]
-syscall
-    }
-    return;
-}
+#include <io>
 
-int read(int fd, char* buf, int count) {
-    asm {
-mov rax, 0
-mov rdi, qword[rbp + 16]
-mov rsi, qword[rbp + 24]
-mov rdx, qword[rbp + 32]
-syscall
-    }
-    return;
-}
-
-//проблема с типами
 int main() {
     int i = 5;
     while (1) {

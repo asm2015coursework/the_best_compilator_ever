@@ -712,7 +712,7 @@ Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
     append("call " + token->name);
     append("add rsp, " + sizeToString(total_size));
     if (functions.count(token->name) == 0) {
-        type_err("handleFunctionCall: Unknown function");
+        type_err("handleFunctionCall: Unknown function " + token->name);
     }
     return functions[token->name];
 }
