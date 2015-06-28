@@ -1,0 +1,47 @@
+int write(int fd, char* buf, int count) {
+    asm {
+mov rax, 1
+mov rdi, qword[rbp + 8]
+mov rsi, qword[rbp + 16]
+mov rdx, qword[rbp + 24]
+syscall
+    }
+    return;
+}
+
+int read(int fd, char* buf, int count) {
+    asm {
+mov rax, 0
+mov rdi, qword[rbp + 8]
+mov rsi, qword[rbp + 16]
+mov rdx, qword[rbp + 24]
+syscall
+    }
+    return;
+}
+
+
+struct S {
+    int a;
+    void set(int b) {
+        this->a = b;
+    }
+
+    int get() {
+        return this->a;
+    }
+}
+
+int main() {
+    S s;
+    S* ps = &s;
+    ps->set(2);
+    if (ps->get() == 2) {
+        write(1, "OK", 2);
+    }
+    else {
+        write(1, "WRONG", 5);
+    }
+
+    return 0;
+}

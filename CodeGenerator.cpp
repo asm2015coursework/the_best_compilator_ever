@@ -1,5 +1,7 @@
 #include "CodeGenerator.h"
 #include "lib/Utils.h"
+#include "Globals.h"
+map<std::string, Struct> structs;
 
 #include <stdio.h>
 #include <typeinfo>
@@ -9,32 +11,42 @@
 using std::make_pair;
 
 #define firstcheck(tokenType) if (token->getType() == #tokenType) {\
-    println(#tokenType);\
+    println(#tokenType  " start");\
     handle##tokenType ((tokenType##Token *)token);\
+    println(#tokenType  " end");\
 }
 
 #define check(tokenType) else if (token->getType() == #tokenType) {\
-    println(#tokenType);\
+    println(#tokenType " start");\
     handle##tokenType ((tokenType##Token *)token);\
+    println(#tokenType  " end");\
 }
 
 #define type_firstcheck(tokenType) if (token->getType() == #tokenType) {\
-    println(#tokenType);\
-    return handle##tokenType ((tokenType##Token *)token);\
+    println(#tokenType " start");\
+    Type t = handle##tokenType ((tokenType##Token *)token);\
+    println(#tokenType  " end");\
+    return t;\
 }
 
 #define type_check(tokenType) else if (token->getType() == #tokenType) {\
-    println(#tokenType);\
-    return handle##tokenType ((tokenType##Token *)token);\
+    println(#tokenType " start");\
+    Type t = handle##tokenType ((tokenType##Token *)token);\
+    println(#tokenType  " end");\
+    return t;\
 }
 
 
 #define err(text) error = text;\
         gotError = 1;\
+        std::cout << text << std::endl;\
+        exit(1);\
         return
 
 #define type_err(text) error = text;\
         gotError = 1;\
+        std::cout << text << std::endl;\
+        exit(1);\
         return Type()
 
 
@@ -42,6 +54,7 @@ CodeGenerator::CodeGenerator() {
     gotError = 0;
     if_count = 0;
     cycle_count = 0;
+    structs.clear();
 }
 
 void CodeGenerator::append(const string& s) {
@@ -101,11 +114,11 @@ void CodeGenerator::handleToken(Token* token) {
             check(Or)
             check(Return)
             check(String)
-            //check(StructFunctionCall)
-            //check(StructPtrFunctionCall)
-            //check(StructPtrVariable)
-            //check(Struct)
-            //check(StructVariable)
+            check(StructFunctionCall)
+            check(StructPtrFunctionCall)
+            check(StructPtrVariable)
+            check(Struct)
+            check(StructVariable)
             check(Subtract)
             check(UnaryMinus)
             check(UnaryPlus)
@@ -125,7 +138,7 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(Assignment)
             //type_check(ConstChar)
             type_check(ConstInt)
-            //check(Dereference)
+            check(Dereference)
             type_check(Divide)
             type_check(Equality)
             type_check(FunctionCall)
@@ -139,6 +152,10 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(Not)
             type_check(Or)
             type_check(String)
+            type_check(StructFunctionCall)
+            type_check(StructPtrFunctionCall)
+            type_check(StructPtrVariable)
+            type_check(StructVariable)
             type_check(Subtract)
             type_check(UnaryMinus)
             type_check(UnaryPlus)
@@ -203,6 +220,63 @@ Type CodeGenerator::handleAddress(AddressToken* token) {
         }
         type_err("handleAddress: Wrong token of Dereference");
     }
+    else if (token->expr->getType() == "StructVariable") {
+        StructVariableToken* stoken = (StructVariableToken*)(token->expr);
+        if (stoken->expr->getType() == "Variable") {
+            VariableToken* var = (VariableToken*)(stoken->expr);
+            long long var_offset;
+            Type type;
+            for (int i = (int)vars.size() - 1; i >= 0; i--) {
+                if (vars[i].count(var->_name) == 1) {
+                    var_offset = vars[i][var->_name].first;
+                    type = vars[i][var->_name].second;
+                    if (structs.count(type.name) == 0) {
+                        type_err("handleAddress: handleStructVariable: unknown struct");
+                    }
+                    if (structs[type.name].vars.count(stoken->name) == 0) {
+                        type_err("handleAddress: handleStructVariable: unknown struct member");
+                    }
+                    var_offset -= structs[type.name].vars[stoken->name].first;
+                    type = structs[type.name].vars[stoken->name].second;
+                    append("mov rax, rbp");
+                    append("add rax, " + offsetToString(var_offset));
+                    return Type(type);
+                }
+            }
+            if (globals.count(var->_name) == 1) {
+                Type type = globals[var->_name];
+                var_offset = -structs[type.name].vars[stoken->name].first;
+                if (structs.count(type.name) == 0) {
+                    type_err("handleAddress: handleStructVariable: unknown struct");
+                }
+                if (structs[type.name].vars.count(stoken->name) == 0) {
+                    type_err("handleAddress: handleStructVariable: unknown struct member");
+                }
+                append("mov rax, " + stoken->name);
+                append("add rax, " + offsetToString(var_offset));
+                return Type(type);
+            }
+            type_err("handleAddress: Unknow variable: " + var->_name);
+        }
+    }
+    else if (token->expr->getType() == "StructVariablePtr") {
+        StructPtrVariableToken* stoken = (StructPtrVariableToken*)(token->expr);
+        Type type = handleTypeToken(token->expr);
+        if (type.isPointer() == 0) {
+            type_err("handleStructPtrVariable: wrong expr");
+        }
+        type.dereference();
+        if (structs.count(type.name) == 0) {
+            type_err("handleStructPtrVariable: unknown struct");
+        }
+        if (structs[type.name].vars.count(stoken->name) == 0) {
+            type_err("handleStructPtrVariable: unknown struct member");
+        }
+        long long var_offset = -structs[type.name].vars[stoken->name].first;
+        type = structs[type.name].vars[stoken->name].second;
+        append("add rax, " + offsetToString(var_offset));
+        return Type(type);
+    }
     else {
         type_err("handleAddress: Wrong token");
     }
@@ -216,7 +290,7 @@ Type CodeGenerator::handleAdd(AddToken* token) {
     append("add rax, rdx");
     Type res;
     if (res.setMax(l, r) == 0) {
-        type_err("Wrong types");
+        type_err("handleAdd: Wrong types");
     }
     return res;
 }
@@ -229,12 +303,13 @@ Type CodeGenerator::handleAnd(AndToken* token) {
     append("and rax, rdx");
     Type res;
     if (res.setMax(l, r) == 0) {
-        type_err("Wrong types");
+        type_err("handleAnd: Wrong types");
     }
     return res;
 }
 
 Type CodeGenerator::handleArrayCall(ArrayCallToken* token) {
+    //if ()
     long long var_offset;
     Type type;
     for (int i = (int)vars.size() - 1; i >= 0; i--) {
@@ -304,7 +379,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                 } else if (type.size == 8) {
                     append("mov qword[rbp " + offsetToString(var_offset) + "], rax");
                 } else {
-                    type_err("Wrong type's size of variable: " + name);
+                    type_err("handleAssignment: Wrong type's size of variable: " + name);
                 }
                 return res;
             }
@@ -320,11 +395,11 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
             } else if (type.size == 8) {
                 append("mov qword[" + name+ "], rax");
             } else {
-                type_err("Wrong type's size of variable: " + name);
+                type_err("handleAssignment: Wrong type's size of variable: " + name);
             }
             return res;
         }
-        type_err("Unknow variable: " + name);
+        type_err("handleAssignment: Unknow variable: " + name);
     }
     else if (token->left->getType() == "ArrayCall") {
         //нужно проверить типы
@@ -341,7 +416,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                     append("push rax");
                     Type index = handleTypeToken(atoken->expr);
                     if (!index.isDefault()) {
-                        type_err("handleArrayCall: wrong type of index");
+                        type_err("handleAssignment: handleArrayCall: wrong type of index");
                     }
                     append("mov rdx, " + sizeToString(atype.size));
                     append("mul rdx");
@@ -352,7 +427,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                     append("mov rax, rdx");
                     return Type(atype);
                 }
-                type_err("handleArrayCall: it's not an array");
+                type_err("handleAssignment: handleArrayCall: it's not an array");
             }
         }
         if (globals.count(atoken->name) == 1) {
@@ -363,7 +438,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                 append("push rax");
                 Type index = handleTypeToken(atoken->expr);
                 if (!index.isDefault()) {
-                    type_err("handleArrayCall: wrong type of index");
+                    type_err("handleAssignment: handleArrayCall: wrong type of index");
                 }
                 append("mov rdx, " + sizeToString(atype.size));
                 append("mul rdx");
@@ -373,10 +448,10 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                 append("mov rax, rdx");
                 return Type(atype);
             }
-            type_err("handleArrayCall: it's not an array");
+            type_err("handleAssignment: handleArrayCall: it's not an array");
 
         }
-        type_err("Unknow variable: " + atoken->name);
+        type_err("handleAssignment: Unknow variable: " + atoken->name);
 
     }
     else {
@@ -450,7 +525,7 @@ Type CodeGenerator::handleDivide(DivideToken* token) {
     append("idiv rbx");
     Type res;
     if (res.setMax(l, r) == 0) {
-        type_err("Wrong types");
+        type_err("handleDivide: Wrong types");
     }
     return res;
 }
@@ -493,6 +568,7 @@ Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
     size_t total_size = 0;
     for (int i = (int)token->args.size() - 1; i >= 0; i--) {
         t = handleTypeToken(token->args[i]);
+        std::cout << "--" << t.name << "--" << std::endl;
         if (t.size == 1) {
             append("sub rsp, 1");
             append("mov byte[rsp], al");
@@ -510,13 +586,13 @@ Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
             append("mov qword[rsp], rax");
             total_size += 8;
         } else {
-            type_err("wrong type");
+            type_err("handleFunctionCall: wrong type");
         }
     }
     append("call " + token->name);
     append("add rsp, " + sizeToString(total_size));
     if (functions.count(token->name) == 0) {
-        type_err("Unknown function");
+        type_err("handleFunctionCall: Unknown function");
     }
     return functions[token->name];
 }
@@ -542,7 +618,7 @@ void CodeGenerator::handleFunction(FunctionToken* token) {
     vars.push_back(map<string, pair<long long, Type> >());
     for (size_t i = 0; i < token->_args.size(); i++) {
         if (vars[0].count(token->_args[i]._name) > 0) {
-            err("function's argument is already used: " + token->_type);
+            err("handleFunction: function's argument is already used: " + token->_type);
         }
         vars[0].insert(make_pair(token->_args[i]._name, make_pair(offset, token->_args[i]._type)));
         offset += Type(token->_args[i]._type).size;
@@ -608,10 +684,10 @@ void CodeGenerator::handleIf(IfToken* token) {
 void CodeGenerator::handleInitialization(InitializationToken* token) {/// не хватает присвоения
     if (vars.size() == 0) {//global
         if (globals.count(token->_name) > 0) {
-            err("Global variable already exists: " + token->_name);
+            err("handleInitialization: Global variable already exists: " + token->_name);
         }
         if (token->_expr != 0) {
-            err("Can't initializate global variable");
+            err("handleInitialization: Can't initializate global variable");
         }
         if (token->_size == 0) {
             globals.insert(make_pair(token->_name, Type(token->_type)));
@@ -625,7 +701,7 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
     }
     else {//not global
         if (vars.back().count(token->_name) > 0) {
-            err("Variable already exists: " + token->_name);
+            err("handleInitialization: Variable already exists: " + token->_name);
         }
         if (token->_size == 0) {
             offset += Type(token->_type).size;
@@ -636,7 +712,7 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
                 Type l(token->_type);
                 Type res = l;
                 if (l.name != r.name && res.setMax(l, r) == 0) {
-                    err("InitializationToken: wrong types: " + l.name + ", " + r.name);
+                    err("handleInitialization: wrong types: " + l.name + ", " + r.name);
                 }
                 if (res.size == 1) {
                     append("mov byte[rsp], al");
@@ -647,13 +723,13 @@ void CodeGenerator::handleInitialization(InitializationToken* token) {/// не �
                 } else if (res.size == 8) {
                     append("mov qword[rsp], rax");
                 } else {
-                    err("InitializationToken: Wrong type's size of variable: " + token->_name);
+                    err("handleInitialization: Wrong type's size of variable: " + token->_name);
                 }
             }
         }
         else {//array
             if (token->_expr != 0) {
-                err("Initialization token: cant init array");
+                err("handleInitialization: can't init array");
             }
             if (token->_size->getType() == "ConstInt" && ((ConstIntToken*)(token->_size))->value > 0){
                 size_t cursize = Type(token->_type).size * ((ConstIntToken*)(token->_size))->value;
@@ -704,7 +780,7 @@ Type CodeGenerator::handleMultiply(MultiplyToken* token) {
     append("imul rdx");
     Type res;
     if (res.setMax(l, r) == 0) {
-        type_err("Wrong types");
+        type_err("handleMultiply: Wrong types");
     }
     return res;
 }
@@ -725,7 +801,7 @@ Type CodeGenerator::handleNotEquality(NotEqualityToken* token) {
 Type CodeGenerator::handleNot(NotToken* token) {
     Type l = handleTypeToken(token->expr);
     if (!l.isDefault()) {
-        type_err("Not: wrong type");
+        type_err("handleNot: wrong type");
     }
     append("xor rax, 0");
     return Type("int");
@@ -740,7 +816,7 @@ Type CodeGenerator::handleOr(OrToken* token) {
     append("or rax, rdx");
     Type res;
     if (res.setMax(l, r) == 0) {
-        type_err("Wrong types");
+        type_err("handleOr: Wrong types");
     }
     return res;
 }
@@ -764,16 +840,87 @@ Type CodeGenerator::handleString(StringToken* token) {
 }
 
 
-Type CodeGenerator::handleStructFunctionCall(StructFunctionCallToken*) {
+Type CodeGenerator::handleStructFunctionCall(StructFunctionCallToken* token) {
 
 }
 
-Type CodeGenerator::handleStructPtrFunctionCall(StructPtrFunctionCallToken*) {
+Type CodeGenerator::handleStructPtrFunctionCall(StructPtrFunctionCallToken* token) {
+    Type type;
+    size_t total_size = 0;
+    for (long long i = (long long)token->args.size() - 1; i >= 0; i--) {
+        type = handleTypeToken(token->args[i]);
+        if (type.size == 1) {
+            append("sub rsp, 1");
+            append("mov byte[rsp], al");
+            total_size += 1;
+        } else if (type.size == 2) {
+            append("sub rsp, 2");
+            append("mov word[rsp], ax");
+            total_size += 2;
+        } else if (type.size == 4) {
+            append("sub rsp, 4");
+            append("mov dword[rsp], eax");
+            total_size += 4;
+        } else if (type.size == 8) {
+            append("sub rsp, 8");
+            append("mov qword[rsp], rax");
+            total_size += 8;
+        } else {
+            type_err("handleStructPtrFunctionCall: wrong type");
+        }
+    }
 
+    type = handleTypeToken(token->expr);
+    if (type.isPointer() == 0) {
+        type_err("handleStructPtrFunctionCall: wrong expr");
+    }
+    type.dereference();
+    if (structs.count(type.name) == 0) {
+        type_err("handleStructPtrFunctionCall: unknown struct");
+    }
+    if (structs[type.name].functions.count(token->name) == 0) {
+        type_err("handleStructPtrFunctionCall: unknown struct method: " + token->name);
+    }
+
+    append("sub rsp, 8");
+    append("mov qword[rsp], rax");
+    total_size += 8;
+    append("call " + type.name + "." + token->name);
+    append("add rsp, " + sizeToString(total_size));
+    return structs[type.name].functions[token->name];
 }
 
-Type CodeGenerator::handleStructPtrVariable(StructPtrVariableToken*) {
-
+Type CodeGenerator::handleStructPtrVariable(StructPtrVariableToken* token) {
+    Type type = handleTypeToken(token->expr);
+    if (type.isPointer() == 0) {
+        type_err("handleStructPtrVariable: wrong expr");
+    }
+    type.dereference();
+    if (structs.count(type.name) == 0) {
+        type_err("handleStructPtrVariable: unknown struct");
+    }
+    if (structs[type.name].vars.count(token->name) == 0) {
+        type_err("handleStructPtrVariable: unknown struct member");
+    }
+    long long var_offset = -structs[type.name].vars[token->name].first;
+    type = structs[type.name].vars[token->name].second;
+    append("mov rdx, rax");
+    append("add rdx, " + offsetToString(var_offset));
+    if (type.size == 1) {
+        append("xor rax, rax");
+        append("mov al, byte[rdx]");
+    } else if (type.size == 2) {
+        append("xor rax, rax");
+        append("mov ax, word[rdx]");
+    } else if (type.size == 4) {
+        append("xor rax, rax");
+        append("mov eax, dword[rdx]");
+    } else if (type.size == 8) {
+        append("mov rax, qword[rdx]");
+    } else {
+        type_err("handleStructPtrVariable: wrong type");
+    }
+    return Type(type);
 }
 
 void CodeGenerator::handleStruct(StructToken* token) {
@@ -796,32 +943,103 @@ void CodeGenerator::handleStruct(StructToken* token) {
         }
         if (var->_size == 0) {
             type = Type(var->_type);
-            struct_offset += type.size;
             cur_struct.vars.insert(make_pair(var->_name, make_pair(struct_offset, type)));
+            struct_offset += type.size;
         }
         else if (var->_size->getType() == "ConstInt") {
             type = Type(var->_type);
             array_size = ((ConstIntToken*)(var->_size))->value;
             type.setLength(array_size);
+            cur_struct.vars.insert(make_pair(var->_name, make_pair(struct_offset, type.toPointer())));
             struct_offset += array_size * type.size;
-            type = type.toPointer();
-            cur_struct.vars.insert(make_pair(var->_name, make_pair(struct_offset, type)));
         }
         else {
             err("handleStruct: wrong array size");
         }
     }
+    cur_struct.size = struct_offset;
 
     FunctionToken* function;
-    for (size_t i = 0; i < token->functions.size(); i++) {
-        function = token->functions[i];
+    vector<Variable> args;
 
+    for (size_t i = 0; i < token->functions.size(); i++) {
+        args.push_back(Variable(token->name + "*", "this"));
+        for (size_t j = 0; j < token->functions[i]->_args.size(); j++) {
+            args.push_back(token->functions[i]->_args[j]);
+        }
+        function = new FunctionToken(token->functions[i]->_type, token->name + "." + token->functions[i]->_name, args, token->functions[i]->_body);
+        cur_struct.functions.insert(make_pair(token->functions[i]->_name, Type(token->functions[i]->_type)));
+        handleFunction(function);
+        ///delete function;
+        args.clear();
     }
+
 }
 
 
-Type CodeGenerator::handleStructVariable(StructVariableToken*) {
-
+Type CodeGenerator::handleStructVariable(StructVariableToken* token) {
+    if (token->expr->getType() == "Variable") {
+        VariableToken* var = (VariableToken*)(token->expr);
+        long long var_offset;
+        Type type;
+        for (int i = (int)vars.size() - 1; i >= 0; i--) {
+            if (vars[i].count(var->_name) == 1) {
+                var_offset = vars[i][var->_name].first;
+                type = vars[i][var->_name].second;
+                if (structs.count(type.name) == 0) {
+                    type_err("handleStructVariable: unknown struct");
+                }
+                if (structs[type.name].vars.count(token->name) == 0) {
+                    type_err("handleStructVariable: unknown struct member");
+                }
+                var_offset -= structs[type.name].vars[token->name].first;
+                type = structs[type.name].vars[token->name].second;
+                if (type.size == 1) {
+                    append("xor rax, rax");
+                    append("al, byte[rbp " + offsetToString(var_offset) + "]");
+                } else if (type.size == 2) {
+                    append("xor rax, rax");
+                    append("ax, word[rbp " + offsetToString(var_offset) + "]");
+                } else if (type.size == 4) {
+                    append("xor rax, rax");
+                    append("eax, dword[rbp " + offsetToString(var_offset) + "]");
+                } else if (type.size == 8) {
+                    append("rax, qword[rbp " + offsetToString(var_offset) + "]");
+                } else {
+                    type_err("handleStructVariable: wrong type");
+                }
+                return Type(type);
+            }
+        }
+        if (globals.count(var->_name) == 1) {
+            Type type = globals[var->_name];
+            var_offset = -structs[type.name].vars[token->name].first;
+            if (structs.count(type.name) == 0) {
+                type_err("handleStructVariable: unknown struct");
+            }
+            if (structs[type.name].vars.count(token->name) == 0) {
+                type_err("handleStructVariable: unknown struct member");
+            }
+            append("mov rdx, " + token->name);
+            append("add rdx, " + offsetToString(var_offset));
+            if (type.size == 1) {
+                append("xor rax, rax");
+                append("move al, byte[rdx]");
+            } else if (type.size == 2) {
+                append("xor rax, rax");
+                append("mov ax, word[rdx]");
+            } else if (type.size == 4) {
+                append("xor rax, rax");
+                append("mov eax, dword[rdx]");
+            } else if (type.size == 8) {
+                append("mov rax, qword[rdx]");
+            } else {
+                type_err("handleStructVariable: Wrong type's size of variable");
+            }
+            return Type(type);
+        }
+        type_err("Unknow variable: " + var->_name);
+    }
 }
 
 Type CodeGenerator::handleSubtract(SubtractToken* token) {
@@ -833,7 +1051,7 @@ Type CodeGenerator::handleSubtract(SubtractToken* token) {
     append("sub rax, rdx");
     Type res;
     if (res.setMax(l, r) == 0) {
-        type_err("Wrong types");
+        type_err("handleSubstract: Wrong types");
     }
     return res;
 }
@@ -877,7 +1095,7 @@ Type CodeGenerator::handleVariable(VariableToken* token) {
                 } else if (type.size == 8) {
                     append("mov rax, qword[rbp " + offsetToString(var_offset) + "]");
                 } else {
-                    type_err("Wrong type's size of variable: " + token->_name);
+                    type_err("handleVariable: Wrong type's size of variable: " + token->_name);
                 }
             }
             return Type(type);
@@ -897,11 +1115,11 @@ Type CodeGenerator::handleVariable(VariableToken* token) {
         } else if (type.size == 8) {
             append("mov rax, qword[" + token->_name+ "]");
         } else {
-            type_err("Wrong type's size of variable: " + token->_name);
+            type_err("handleVariable: Wrong type's size of variable: " + token->_name);
         }
         return Type(type);
     }
-    type_err("Unknow variable: " + token->_name);
+    type_err("handleVariable: Unknown variable: " + token->_name);
 }
 
 void CodeGenerator::handleWhile(WhileToken* token) {
@@ -930,7 +1148,7 @@ Type CodeGenerator::handleXor(XorToken *token) {
     append("xor rax, rdx");
     Type res;
     if (res.setMax(l, r) == 0) {
-        type_err("Wrong types");
+        type_err("handleXor: Wrong types");
     }
     return res;
 }

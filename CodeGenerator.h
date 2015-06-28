@@ -7,6 +7,8 @@
 
 #include "parser/Parser.h"
 #include "Type.h"
+#include "Struct.h"
+
 
 using std::string;
 using std::vector;
@@ -26,7 +28,6 @@ class CodeGenerator {
     long long offset;
     map<string, Type> functions;
 
-    map<string, Struct> structs;
 
     CodeGenerator();
     void append(const string&);

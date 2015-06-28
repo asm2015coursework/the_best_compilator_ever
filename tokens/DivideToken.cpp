@@ -1,3 +1,4 @@
+
 #include "DivideToken.h"
 
 DivideToken::DivideToken(Token *left, Token *right) {

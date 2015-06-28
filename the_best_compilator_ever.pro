@@ -62,7 +62,8 @@ SOURCES += main.cpp \
     tokens/StructPtrVariableToken.cpp \
     tester/Tester.cpp \
     tokens/LowerEqualityToken.cpp \
-    tokens/GreaterEqualityToken.cpp
+    tokens/GreaterEqualityToken.cpp \
+    Type.cpp
 
 HEADERS += \
     CodeGenerator.h \
@@ -97,7 +98,6 @@ HEADERS += \
     tokens/ConstCharToken.h \
     tokens/ModToken.h \
     tokens/XorToken.h \
-    Type.h \
     tokens/NotToken.h \
     tokens/NotEqualityToken.h \
     tokens/StringToken.h \
@@ -114,7 +114,10 @@ HEADERS += \
     tokens/StructPtrVariableToken.h \
     tester/Tester.h \
     tokens/LowerEqualityToken.h \
-    tokens/GreaterEqualityToken.h
+    tokens/GreaterEqualityToken.h \
+    Struct.h \
+    Type.h \
+    Globals.h
 
 OTHER_FILES += \
     tests/test0.cmm \
@@ -126,4 +129,5 @@ OTHER_FILES += \
     tests/test3.cmm \
     tester/log.txt \
     tests/test01.cmm \
-    tests/test02.cmm
+    tests/test02.cmm \
+    tests/test03.cmm

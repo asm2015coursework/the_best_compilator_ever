@@ -20,10 +20,4 @@ public:
     }
 };
 
-class Struct {
-public:
-    map<string, Type> functions;
-    map<string, pair<size_t, Type> > vars;
-};
-
 #endif // VARIABLE_H
