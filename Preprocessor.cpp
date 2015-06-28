@@ -17,7 +17,7 @@ string Preprocessor::preprocess(string file_name) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
     resultCode = preprocessor.deleteComments(resultCode);
-
+    resultCode = preprocessor.applyDefines(resultCode);  
     resultCode = preprocessor.applyIncludes(resultCode, "");
     return resultCode;
 }
@@ -26,6 +26,7 @@ string Preprocessor::preprocess(string file_name, string filePath) {
     string resultCode = fileToString(file_name);
     Preprocessor preprocessor = Preprocessor();
     resultCode =  preprocessor.deleteComments(resultCode);
+    resultCode = preprocessor.applyDefines(resultCode);
     resultCode = preprocessor.applyIncludes(resultCode, filePath);
     return resultCode;
 }
