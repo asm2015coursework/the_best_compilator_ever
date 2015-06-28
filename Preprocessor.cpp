@@ -80,7 +80,7 @@ string Preprocessor::applyIncludes(string code, string filePath) {
                 shift += replaceSizeCount + fileSource.length();
             } else if (code[includePosition] == '"'){
                 includePosition++;
-                string::size_type fileNameEndPosition = code.find('>', includePosition);
+                string::size_type fileNameEndPosition = code.find('"', includePosition);
                 string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(filePath + fileName, filePath + fileName.substr(0, fileName.find_last_of('/')));
                 string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
