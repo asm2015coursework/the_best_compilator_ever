@@ -18,7 +18,7 @@
 #include <fstream>
 #include <typeinfo>
 
-int Tester::test(string name, bool withoutTokens = true) {
+int Tester::test(string name, bool withoutTokens) {
     try {
         Parser parser;
         Preprocessor preproc;
@@ -78,7 +78,7 @@ void Tester::remove_log(){
     remove ("../the_best_compilator_ever/tester/log.txt");
 }
 
-int Tester::run_tests(int* a, bool withoutTokens = true) {
+int Tester::run_tests(int* a, bool withoutTokens) {
     int failed = 0;
     Tester::remove_log();
     for (int i = 0; i < sizeof(a); ++i){
@@ -87,12 +87,12 @@ int Tester::run_tests(int* a, bool withoutTokens = true) {
     return failed;
 }
 
-int Tester::run_one(string name, bool withoutTokens = true) {
+int Tester::run_one(string name, bool withoutTokens) {
     Tester::remove_log();
     return Tester::test("../the_best_compilator_ever/tests/" + name, withoutTokens);
 }
 
-int Tester::run_all(bool withoutTokens = true) {
+int Tester::run_all(bool withoutTokens) {
     int failed = 0;
     Tester::remove_log();
     for (int i = 0; i < 4 ; ++i){
