@@ -42,10 +42,10 @@ string Preprocessor::applyDefines(string code) {
             definePosition++;
         }
         if (!this->inBrackets(code, definePositionBegin)) {
-            string::size_type constantEndPosition = code.find(' ', definePosition);
-            string constantValue = code.substr(definePosition, constantEndPosition - definePosition);
-            string::size_type macroEndPosition = code.find(' ', constantEndPosition + 1);
-            string macroValue = code.substr(constantEndPosition + 1, macroEndPosition - constantEndPosition - 1);
+            string::size_type macroEndPosition = code.find(' ', definePosition);
+            string macroValue = code.substr(definePosition, macroEndPosition - definePosition);
+            string::size_type constantEndPosition = code.find(' ', macroEndPosition + 1);
+            string constantValue = code.substr(constantEndPosition + 1, constantEndPosition - macroEndPosition - 1);
             string::size_type macroPosition = resultCode.find(macroValue);
             while (macroPosition != resultCode.npos) {
                 resultCode.replace(macroPosition, macroValue.length(), constantValue);
@@ -80,7 +80,7 @@ string Preprocessor::applyIncludes(string code, string filePath) {
                 shift += replaceSizeCount + fileSource.length();
             } else if (code[includePosition] == '"'){
                 includePosition++;
-                string::size_type fileNameEndPosition = code.find('>', includePosition);
+                string::size_type fileNameEndPosition = code.find('"', includePosition);
                 string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(filePath + fileName, filePath + fileName.substr(0, fileName.find_last_of('/')));
                 string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
