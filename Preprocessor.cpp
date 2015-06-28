@@ -15,6 +15,9 @@ int Preprocessor::setIncludeDirectory(string includeDirectory) {
 
 string Preprocessor::preprocess(string file_name) {
     string resultCode = fileToString(file_name);
+    if (resultCode == "") {
+        println("No such file:" + file_name);
+    }
     Preprocessor preprocessor = Preprocessor();
     resultCode = preprocessor.deleteComments(resultCode);
     resultCode = preprocessor.applyDefines(resultCode);
@@ -24,6 +27,9 @@ string Preprocessor::preprocess(string file_name) {
 
 string Preprocessor::preprocess(string file_name, string filePath) {
     string resultCode = fileToString(file_name);
+    if (resultCode == "") {
+        println("No such file:" + file_name);
+    }
     Preprocessor preprocessor = Preprocessor();
     resultCode =  preprocessor.deleteComments(resultCode);
     resultCode = preprocessor.applyDefines(resultCode);
