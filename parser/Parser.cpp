@@ -225,38 +225,58 @@ pair<Token*, size_t> Parser::commandParse(size_t x) {
             if (str[x] != '(') throw ParsingException(x, '(', str[x]);
             x++;
             while (x < str.length() && isspace(str[x])) x++;
-            if (types.find(nameParse(x).first) != types.end()) {
-                pair <Token*, size_t> p = initializationParse(x);
-                expr1 = p.first;
-                x = p.second;
+            if (str[x] == ';') {
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
             } else {
-                pair <Token*, size_t> p = expressionParse(x);
-                expr1 = p.first;
-                x = p.second;
+                if (types.find(nameParse(x).first) != types.end()) {
+                    pair <Token*, size_t> p = initializationParse(x);
+                    expr1 = p.first;
+                    x = p.second;
+                } else {
+                    pair <Token*, size_t> p = expressionParse(x);
+                    expr1 = p.first;
+                    x = p.second;
+                    if (str[x] != ';') throw ParsingException(x, ';', str[x]);
+                    x++;
+                    while (x < str.length() && isspace(str[x])) x++;
+                }
+            }
+            if (str[x] == ';') {
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
+            } else {
+                pair <Token*, size_t> p2 = expressionParse(x);
+                expr2 = p2.first;
+                x = p2.second;
                 if (str[x] != ';') throw ParsingException(x, ';', str[x]);
                 x++;
                 while (x < str.length() && isspace(str[x])) x++;
             }
-            pair <Token*, size_t> p2 = expressionParse(x);
-            expr2 = p2.first;
-            x = p2.second;
-            if (str[x] != ';') throw ParsingException(x, ';', str[x]);
-            x++;
-            while (x < str.length() && isspace(str[x])) x++;
-            pair <Token*, size_t> p3 = expressionParse(x);
-            expr3 = p3.first;
-            x = p3.second;
-            if (str[x] != ')') throw ParsingException(x, ')', str[x]);
-            x++;
-            while (x < str.length() && isspace(str[x])) x++;
-            if (str[x] == '{') {
-                pair <Token* , size_t> p3 = blockParse(x);
-                cmd = p3.first;
-                x = p3.second;
+            if (str[x] == ')') {
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
             } else {
-                pair <Token* , size_t> p3 = commandParse(x);
-                cmd = p3.first;
+                pair <Token*, size_t> p3 = expressionParse(x);
+                expr3 = p3.first;
                 x = p3.second;
+                if (str[x] != ')') throw ParsingException(x, ')', str[x]);
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
+            }
+            if (str[x] != ';') {
+                if (str[x] == '{') {
+                    pair <Token* , size_t> p3 = blockParse(x);
+                    cmd = p3.first;
+                    x = p3.second;
+                } else {
+                    pair <Token* , size_t> p3 = commandParse(x);
+                    cmd = p3.first;
+                    x = p3.second;
+                }
+            } else {
+                x++;
+                while (x < str.length() && isspace(str[x])) x++;
             }
             return make_pair(new ForToken(expr1, expr2, expr3, cmd), x);
         } else if (name == "while") {
