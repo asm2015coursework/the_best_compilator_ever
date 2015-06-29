@@ -158,7 +158,7 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(Assignment)
             //type_check(ConstChar)
             type_check(ConstInt)
-            check(Dereference)
+            type_check(Dereference)
             type_check(Divide)
             type_check(Equality)
             type_check(FunctionCall)
@@ -661,18 +661,18 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
             genCpy(type.size);
         } else if (type.size == 1) {
             append("mov rdx, rsi");
-            append("byte[rax], dl");
+            append("mov byte[rax], dl");
             append("mov rax, rdx");
         } else if (type.size == 2) {
             append("mov rdx, rsi");
-            append("worg[rax], dx");
+            append("mov word[rax], dx");
             append("mov rax, rdx");
         } else if (type.size == 4) {
             append("mov rdx, rsi");
-            append("dword[rax], edx");
+            append("mov dword[rax], edx");
             append("mov rax, rdx");
         } else if (type.size == 8) {
-            append("qword[rax], rsi");
+            append("mov qword[rax], rsi");
             append("mov rax, rsi");
         }
         return type;
@@ -759,7 +759,7 @@ void CodeGenerator::handleContinue() {
 }
 
 Type CodeGenerator::handleDereference(DereferenceToken* token) {
-    Type l = handleTypeToken(token);
+    Type l = handleTypeToken(token->expr);
     if (l.isPointer() == 0) {
         type_err("handleDereference: there is no pointer");
     }

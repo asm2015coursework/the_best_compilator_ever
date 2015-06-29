@@ -1,6 +1,26 @@
 #include <io>
 
+void prefix_function (char* s, int len, int* pi) {
+    int n = len;
 
+    int res[100];
+    res[0] = 0;
+    char s2[100];
+    int i;
+    for (i = 0; i < len; i = i + 1)
+        s2[i] = *(s + i);
+    for (i = 1; i < n; i = i + 1) {
+        int j = res[i - 1];
+        while (j > 0 & s2[i] != s2[j])
+            j = res[j - 1];
+        if (s2[i] == s2[j])
+            j = j + 1;
+        res[i] = j;
+    }
+    for (i = 0; i < n; i = i + 1)
+        *(pi + i) = res[i];
+    return;
+}
 
 int main() {
 
