@@ -1,18 +1,11 @@
 #include <io>
 
-struct S{
-int a;
-char b;
-}
 
-int read_num(int fd) {
-    char buf[1];
-    read(fd, buf, 1);
-    //while (buf[0] != )
-}
 
 int main() {
 
+    int a = read_num(0);
+    write_num(1, a);
     //S* s = malloc(9);
     //S* p = malloc(9);
     //s->a = 4;
@@ -20,22 +13,15 @@ int main() {
     //    write(1, "!", 1);
     //}
 
-    //char buf[2];
+    //char a = 12;
+    //char buf[1];
     //read(0, buf, 1);
-    //buf[1] = buf[0] + (97 == buf[0]);
-    //write(1, buf, 2);
-    //char c;
-    //for (c = 1; 98 != c; c = c + 1) {
-    //    write(1, &c, 1);
-    //}
-    char buf[2];
-    buf[1] = 100;
-    buf[0] = 97 + 98 * 256;
+    //buf[0] == 97;
     //if (buf[0] == 97) {
     //    write(1, "!", 1);
     //}
-    //buf[0] = buf[0] + (buf[0] == 97);
-    write(1, buf, 2);
+
+
 
     return 0;
 }

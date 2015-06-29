@@ -129,7 +129,7 @@ void CodeGenerator::handleToken(Token* token) {
             check(Initialization)
             check(LowerEquality)
             check(Lower)
-            //check(Mod)
+            check(Mod)
             check(Multiply)
             check(Or)
             check(Return)
@@ -166,7 +166,7 @@ Type CodeGenerator::handleTypeToken(Token* token) {
             type_check(Greater)
             type_check(LowerEquality)
             type_check(Lower)
-            //type_check(Mod)
+            type_check(Mod)
             type_check(Multiply)
             type_check(NotEquality)
             type_check(Not)
@@ -389,7 +389,25 @@ Type CodeGenerator::handleArrayCall(ArrayCallToken* token) {
                     append("mul rdx");
                     append("add rax, rbp");
                     append("add rax, " + offsetToString(var_offset));
-                    append("mov rax, qword[rax]");
+
+                    //std::cout << "____________" << type.name << std::endl;
+                    if (!type.isDefault()) {
+
+                    } else if (type.size == 1) {
+                        append("mov rdx, rax");
+                        append("xor rax, rax");
+                        append("mov al, byte[rdx]");
+                    } else if (type.size == 2) {
+                        append("mov rdx, rax");
+                        append("xor rax, rax");
+                        append("mov ax, word[rdx]");
+                    } else if (type.size == 4) {
+                        append("mov rdx, rax");
+                        append("xor rax, rax");
+                        append("mov eax, dword[rdx]");
+                    } else if (type.size == 8) {
+                        append("mov rax, qword[rax]");
+                    }
                     return Type(type);
                 }
                 type_err("handleArrayCall: it's not an array" + token->toString());
@@ -407,7 +425,23 @@ Type CodeGenerator::handleArrayCall(ArrayCallToken* token) {
                 append("mov rdx, " + sizeToString(type.size));
                 append("mul rdx");
                 append("add rax, qword[" + vtoken->_name + "]");
-                append("mov rax, qword[rax]");
+                if (!type.isDefault()) {
+
+                } else if (type.size == 1) {
+                    append("mov rdx, rax");
+                    append("xor rax, rax");
+                    append("mov al, byte[rdx]");
+                } else if (type.size == 2) {
+                    append("mov rdx, rax");
+                    append("xor rax, rax");
+                    append("mov ax, word[rdx]");
+                } else if (type.size == 4) {
+                    append("mov rdx, rax");
+                    append("xor rax, rax");
+                    append("mov eax, dword[rdx]");
+                } else if (type.size == 8) {
+                    append("mov rax, qword[rax]");
+                }
                 return Type(type);
             }
             type_err("handleArrayCall: it's not an array");
@@ -580,8 +614,28 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                     append("mul rdx");
                     append("add rax, qword[" + vtoken->_name + "]");
                     append("pop rdx");
-                    append("mov qword[rax], rdx");
-                    append("mov rax, rdx");
+
+
+                    if (atype.name != atype.name && atype.setMax(atype, res) == 0) {
+                        type_err("handleAssignment: handleArrayCall: wrong types");
+                    }
+                    if (!atype.isDefault()){
+                        append("mov rdi, qword[rax]");
+                        append("mov rsi, rdx");
+                        genCpy(atype.size);
+                    } else if (atype.size == 1) {
+                        append("mov byte[rax], dl");
+                        append("mov rax, rdx");
+                    } else if (atype.size == 2) {
+                        append("mov word[rax], dx");
+                        append("mov rax, rdx");
+                    } else if (atype.size == 4) {
+                        append("mov dword[rax], edx");
+                        append("mov rax, rdx");
+                    } else if (atype.size == 8) {
+                        append("mov qword[rax], rdx");
+                        append("mov rax, rdx");
+                    }
                     return Type(atype);
                 }
                 type_err("handleAssignment: handleArrayCall: it's not an array");
@@ -732,9 +786,9 @@ Type CodeGenerator::handleDereference(DereferenceToken* token) {
 }
 
 Type CodeGenerator::handleDivide(DivideToken* token) {
-    Type l = handleTypeToken(token->left);
-    append("push rax");
     Type r = handleTypeToken(token->right);
+    append("push rax");
+    Type l = handleTypeToken(token->left);
     append("pop rbx");
     append("xor rdx, rdx");
     append("idiv rbx");
@@ -991,7 +1045,19 @@ Type CodeGenerator::handleLower(LowerToken* token) {
     return Type("int");
 }
 Type CodeGenerator::handleMod(ModToken* token) {
-
+    Type r = handleTypeToken(token->right);
+    append("push rax");
+    Type l = handleTypeToken(token->left);// rax - l
+    append("pop rcx");//rcx -r
+    append("xor rdx, rdx");
+    //append("cdq");
+    append("idiv rcx");
+    append("mov rax, rdx");
+    Type res;
+    if (res.setMax(l, r) == 0) {
+        type_err("handleDivide: Wrong types");
+    }
+    return res;
 }
 
 Type CodeGenerator::handleMultiply(MultiplyToken* token) {
