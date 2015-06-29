@@ -101,6 +101,7 @@ int Tester::run_all(bool withoutTokens) {
             fclose(file);
             failed += Tester::test(name, withoutTokens);
         } else {
+            std::cout<< name << " not found\n";
             break;
         }
     }
