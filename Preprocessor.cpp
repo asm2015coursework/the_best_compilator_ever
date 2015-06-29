@@ -34,6 +34,7 @@ string Preprocessor::preprocess(string file_name, string filePath, string includ
 }
 
 string Preprocessor::applyDefines(string code) {
+
     const string definePointer = "#define";
     string resultCode(code);
     string::size_type definePositionBegin = code.find(definePointer, 0);
@@ -47,7 +48,10 @@ string Preprocessor::applyDefines(string code) {
             string::size_type macroEndPosition = code.find(' ', definePosition);
             string macroValue = code.substr(definePosition, macroEndPosition - definePosition);
             string::size_type constantEndPosition = code.find(' ', macroEndPosition + 1);
-            string constantValue = code.substr(constantEndPosition + 1, constantEndPosition - macroEndPosition - 1);
+            if (code.find('\n', macroEndPosition + 1) < constantEndPosition) {
+                constantEndPosition = code.find('\n', macroEndPosition + 1);
+            }
+            string constantValue = code.substr(macroEndPosition + 1, constantEndPosition - macroEndPosition - 1);
             string::size_type macroPosition = resultCode.find(macroValue);
             while (macroPosition != resultCode.npos) {
                 resultCode.replace(macroPosition, macroValue.length(), constantValue);
@@ -55,6 +59,18 @@ string Preprocessor::applyDefines(string code) {
             }
         }
         definePositionBegin = code.find(definePointer, definePosition);
+    }
+    definePositionBegin = resultCode.find(definePointer, 0);
+    while (definePositionBegin != resultCode.npos) {
+        definePosition = definePositionBegin + definePointer.length();
+        while (code[definePosition] == ' ') {
+            definePosition++;
+        }
+        if (!this->inBrackets(code, definePositionBegin)) {
+            string::size_type definePositionEnd = resultCode.find('\n', definePositionBegin);
+            resultCode.replace(definePositionBegin, definePositionEnd - definePositionBegin, "");
+        }
+        definePositionBegin = resultCode.find(definePointer, definePositionBegin);
     }
     return resultCode;
 }
