@@ -34,6 +34,7 @@ vector<Token*> Parser::parse(string code) {
             ans.push_back(p.first);
             x = p.second;
         } else if (type == "struct") {
+            types.insert(name);
             vector<InitializationToken*> variables;
             vector<FunctionToken*> functions;
             if (str[x] != '{') throw ParsingException(x, '{', str[x]);
@@ -63,8 +64,7 @@ vector<Token*> Parser::parse(string code) {
                 }
             }
             x++;
-            while (x < str.length() && isspace(str[x])) x++;
-            types.insert(name);
+            while (x < str.length() && isspace(str[x])) x++;            
             ans.push_back(new StructToken(name, variables, functions));
         } else {
             pair<InitializationToken*, size_t> p = initializationParse(y);
