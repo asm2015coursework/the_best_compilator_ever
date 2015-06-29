@@ -1403,21 +1403,27 @@ Type CodeGenerator::handleVariable(VariableToken* token) {
     }
     if (globals.count(token->_name) == 1) {
         Type type = globals[token->_name];
-        if (!type.isDefault()) {
+        if (type.length > 0) {
             append("mov rax, " + token->_name);
-        } else if (type.size == 1) {
-            append("xor rax, rax");
-            append("mov al, byte[" + token->_name + "]");
-        } else if (type.size == 2) {
-            append("xor rax, rax");
-            append("mov ax, word[" + token->_name + "]");
-        } else if (type.size == 4) {
-            append("xor rax, rax");
-            append("mov eax, dword[" + token->_name + "]");
-        } else if (type.size == 8) {
-            append("mov rax, qword[" + token->_name+ "]");
-        } else {
-            type_err("handleVariable: Wrong type's size of variable: " + token->_name);
+            type.setLength(0);
+        }
+        else {
+            if (!type.isDefault()) {
+                append("mov rax, " + token->_name);
+            } else if (type.size == 1) {
+                append("xor rax, rax");
+                append("mov al, byte[" + token->_name + "]");
+            } else if (type.size == 2) {
+                append("xor rax, rax");
+                append("mov ax, word[" + token->_name + "]");
+            } else if (type.size == 4) {
+                append("xor rax, rax");
+                append("mov eax, dword[" + token->_name + "]");
+            } else if (type.size == 8) {
+                append("mov rax, qword[" + token->_name+ "]");
+            } else {
+                type_err("handleVariable: Wrong type's size of variable: " + token->_name);
+            }
         }
         return Type(type);
     }
