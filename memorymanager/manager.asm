@@ -21,7 +21,7 @@ global cmm_free
 
 %macro set_len 2
     mov [%1 + 17], %2
-%endmacro
+%endmacro   
 
 %macro set_prev 2
     mov [%1], %2
@@ -45,7 +45,7 @@ global cmm_free
 
 
 section .data
-initial_break:          dq  0
+initial_break:          dq  0 
 current_break:          dq  0
 first_chunk:            dq  0
 last_chunk:             dq  0
@@ -68,18 +68,33 @@ init_cmm_heap:
     mov [init], byte 1
     ret
 
-
 ; rdi - number of bytes to allocate
 ; returns pointer to allocated memory
 ; allocates memory
 cmm_malloc:
+    push rdi
+    call malloc
+    pop rdi
+    ret
+
+;rdi - pointer to memory
+cmm_free:
+    push rdi
+    call free
+    pop rdi
+    ret
+
+
+malloc:
     push rcx
     push r11
     push rdx
     push rdi
+    mov rdi, [rsp + 40]
+
     cmp [init], byte 1
     je .initialized
-
+    
     push rdi
     call init_cmm_heap
     pop rdi
@@ -116,7 +131,7 @@ cmm_malloc:
     mov rcx, rax
     add rcx, chunk_info
     add rcx, rdi
-    get_next rax, rdx
+    get_next rax, rdx 
 
     set_next rax, rcx
     set_next rcx, rdx
@@ -143,14 +158,14 @@ cmm_malloc:
     jmp .cycle
 
 .break
-
+    
     cmp rax, NULL
     jne .exit
     mov rax, rdi
     call allocate_new_chunk
 
 .exit
-
+    
     pop rdi
     pop rdx
     pop r11
@@ -158,14 +173,14 @@ cmm_malloc:
     ret
 
 
-;rdi - pointer to memory
-cmm_free:
+free:
     push rcx
     push r11
     push rdx
     push rdi
     push r8
     push rax
+    mov rdi, [rsp + 56]
 
     sub rdi, chunk_info
     set_free rdi
@@ -174,7 +189,7 @@ cmm_free:
     ;rdi - pointer to current chunk
     cmp rax, NULL
     je .dont_merge_prev
-
+    
     xor rdx, rdx
     get_state rax, dl
     cmp dl, filled_chunk
@@ -197,7 +212,7 @@ cmm_free:
     set_prev rcx, rax
 .here
 
-    ;set len
+    ;set len 
     xor rcx, rcx
     get_len rdi, ecx
     add rcx, chunk_info
@@ -209,10 +224,10 @@ cmm_free:
     mov rdi, rax
 
 .dont_merge_prev
-
+    
     get_next rdi, rax
     ;rax - pointer to next chunk
-    ;rdi - pointer to current chunk
+    ;rdi - pointer to current chunk     
     cmp rax, NULL
     je .dont_merge_next
 
@@ -221,7 +236,7 @@ cmm_free:
     cmp dl, filled_chunk
     je .dont_merge_next
 
-    ;check if rax is last chunk
+    ;check if rax is last chunk 
     cmp [last_chunk], rax
     jne .not_last
     mov [last_chunk], rdi
@@ -239,14 +254,14 @@ cmm_free:
 .here2
 
 
-    ;set len
+    ;set len 
     xor rcx, rcx
     get_len rax, ecx
     add rcx, chunk_info
     xor r8, r8
     get_len rdi, r8d
     add rcx, r8
-    set_len rdi, ecx
+    set_len rdi, ecx    
 
 .dont_merge_next
 
@@ -269,7 +284,7 @@ try_to_free:
     je .exit
     ; rax - last chunk
     ; rdx - before the last
-
+    
     get_prev rax, rdx
     cmp rdx, NULL
     je .null2
@@ -292,7 +307,7 @@ try_to_free:
 .exit
     ret
 
-;rax - length of new chunk
+;rax - length of new chunk 
 ;returns in rax pointer to allocated memory
 allocate_new_chunk:
     mov rdx, rax
@@ -318,7 +333,7 @@ allocate_new_chunk:
     ;set_filled
     set_filled rax
     ;set_len
-    set_len rax, edx
+    set_len rax, edx  
 
 
     pop rax

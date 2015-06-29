@@ -764,16 +764,19 @@ Type CodeGenerator::handleDereference(DereferenceToken* token) {
         type_err("handleDereference: there is no pointer");
     }
     if (l.size == 1) {
+        append("mov rdx, rax");
         append("xor rax, rax");
-        append("mov al, byte[rax]");
+        append("mov al, byte[rdx]");
     }
     else if (l.size == 2) {
+        append("mov rdx, rax");
         append("xor rax, rax");
-        append("mov ax, word[rax]");
+        append("mov ax, word[rdx]");
     }
     else if (l.size == 4) {
+        append("mov rdx, rax");
         append("xor rax, rax");
-        append("mov eax, dword[rax]");
+        append("mov eax, dword[rdx]");
     }
     else if (l.size == 8) {
         append("mov rax, qword[rax]");

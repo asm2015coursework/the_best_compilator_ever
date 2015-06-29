@@ -19,6 +19,8 @@ malloc:
     push r11
     push rdx
     push rdi
+    mov rdi, [rsp + 40]
+
     cmp [init], byte 1
     je .initialized
 
@@ -108,6 +110,7 @@ free:
     push rdi
     push r8
     push rax
+    mov rdi, [rsp + 56]
 
     sub rdi, chunk_info
     set_free rdi
