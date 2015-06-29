@@ -118,10 +118,10 @@ HEADERS += \
     Struct.h \
     Type.h \
     Globals.h \
-    tests/bufio.cmm \
-    tests/test02.cmm
 
 OTHER_FILES += \
+    tests/bufio.cmm \
+    tests/test02.cmm \
     tests/test0.cmm \
     tests/test1.cmm \
     tests/test01.cmm \
