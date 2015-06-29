@@ -85,7 +85,7 @@ bool Type::setMax(const Type &a, const Type &b) {
         size = b.size;
         return 1;
     }
-    if (a.size > b.size) {
+    if (a.size < b.size) {
         name = a.name;
         size = a.size;
         return 1;

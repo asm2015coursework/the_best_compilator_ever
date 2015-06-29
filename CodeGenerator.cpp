@@ -541,8 +541,26 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                         append("add rax, rbp");
                         append("add rax, " + offsetToString(var_offset));
                         append("pop rdx");
-                        append("mov qword[rax], rdx");
-                        append("mov rax, rdx");
+                        if (atype.name != atype.name && atype.setMax(atype, res) == 0) {
+                            type_err("handleAssignment: handleArrayCall: wrong types");
+                        }
+                        if (!atype.isDefault()){
+                            append("mov rdi, qword[rax]");
+                            append("mov rsi, rdx");
+                            genCpy(atype.size);
+                        } else if (atype.size == 1) {
+                            append("mov byte[rax], dl");
+                            append("mov rax, rdx");
+                        } else if (atype.size == 2) {
+                            append("mov word[rax], dx");
+                            append("mov rax, rdx");
+                        } else if (atype.size == 4) {
+                            append("mov dword[rax], edx");
+                            append("mov rax, rdx");
+                        } else if (atype.size == 8) {
+                            append("mov qword[rax], rdx");
+                            append("mov rax, rdx");
+                        }
                         return Type(atype);
                     }
                     type_err("handleAssignment: handleArrayCall: it's not an array" + token->toString());

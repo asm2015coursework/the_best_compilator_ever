@@ -5,14 +5,37 @@ int a;
 char b;
 }
 
+int read_num(int fd) {
+    char buf[1];
+    read(fd, buf, 1);
+    //while (buf[0] != )
+}
+
 int main() {
 
-    S* s = malloc(9);
-    S* p = malloc(9);
+    //S* s = malloc(9);
+    //S* p = malloc(9);
     //s->a = 4;
     //if (p->a == 4) {
     //    write(1, "!", 1);
     //}
+
+    //char buf[2];
+    //read(0, buf, 1);
+    //buf[1] = buf[0] + (97 == buf[0]);
+    //write(1, buf, 2);
+    //char c;
+    //for (c = 1; 98 != c; c = c + 1) {
+    //    write(1, &c, 1);
+    //}
+    char buf[2];
+    buf[1] = 100;
+    buf[0] = 97 + 98 * 256;
+    //if (buf[0] == 97) {
+    //    write(1, "!", 1);
+    //}
+    //buf[0] = buf[0] + (buf[0] == 97);
+    write(1, buf, 2);
 
     return 0;
 }
