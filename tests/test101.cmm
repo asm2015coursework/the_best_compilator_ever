@@ -1,5 +1,4 @@
-
-
+#include<io>
 
 void swap(int* a, int* b){
     int t = *a;
@@ -8,15 +7,16 @@ void swap(int* a, int* b){
 }
 
 int b[1000];
+int a[100];
 
-void sort(int *a, int l, int r) {
+void sort(int l, int r) {
     if (l >= r){
         return;
     }
 
     int m = (l + r) / 2;
-    sort(a, l, m);
-    sort(a, m + 1, r);
+    sort(l, m);
+    sort(m + 1, r);
 
     int i = l;
     int j = m + 1;
@@ -35,33 +35,32 @@ void sort(int *a, int l, int r) {
         b[uk] = a[k];
         uk = uk + 1;
     }
-    for (int k = j; j <= r; k = k + 1){
+    for (k = j; j <= r; k = k + 1){
         b[uk] = a[k];
         uk = uk + 1;
     }
-    for (int i = l; i <= r; i = i + 1)
+    for (i = l; i <= r; i = i + 1)
         a[i] = b[i];
-
 }
 
 
-void read_array(int *a, int len){
-
+void read_array(int len){
+    for (int i = 0; i < len; i = i + 1)
+        a[i] = read_num(0);
 }
 
-void write_array(int *a, int len){
-
+void write_array(int len){
+    for (int i = 0; i < len; i = i + 1)
+        write_num(1, a[i]);
 }
 
 int main(){
+    int SIZE_N = 5;
+    read_array(SIZE_N);
 
-    int a[SIZE_N];
+    sort(0, SIZE_N - 1);
 
-    read_array(a, SIZE_N);
-
-    sort(a, 0, SIZE_N - 1);
-
-    write_array(a, SIZE_N - 1);
+    write_array(SIZE_N);
 
     return 0;
 }
