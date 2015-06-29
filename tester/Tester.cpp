@@ -22,8 +22,8 @@ int Tester::test(string name, bool withoutTokens) {
     try {
         Parser parser;
         Preprocessor preproc;
-
-        vector<Token*> tokens = parser.parse(preproc.preprocess(name + ".cmm"));
+        preproc.setIncludeDirectory("");
+        vector<Token*> tokens = parser.parse(preproc.preprocess(name + ".cmm", "", "../the_best_compilator_ever/cmmlibs/"));
 
         std::ofstream log;
         log.open ("../the_best_compilator_ever/tester/log.txt",  std::ios_base::app);
@@ -43,25 +43,12 @@ int Tester::test(string name, bool withoutTokens) {
              fileFromString(name + ".asm", output);
 
              log << "-----EXECUTION\n";
-             int f = fork();
-             if (f == 0){
-                log << (exec("yasm -felf64 -dgwarf2 "+ name + ".asm -o  "+ name + ".o")) << "\n";
-                return 1;
-             } else {
-                 int status = 0;
-                 wait(&status);
-                 int f2 = fork();
-                 if (f2 == 0){
-                    log << (exec("gcc "+ name + ".o -o " + name)) << "\n";
-                    return 1;
-                 } else {
-                     int status2 = 0;
-                     wait(&status2);
-                     log << "Execution is finished\n";
-                 }
-             }
-             log << "\n";
 
+             string yasm = exec("yasm -felf64 -dgwarf2 "+ name + ".asm -o  "+ name + ".o");
+             log << (yasm == "" ? "YASM OK" : "YASM FAILED") << "\n";
+             string gcc = (exec("gcc "+ name + ".o -o " + name));
+             log << (gcc == "" ? "GCC OK" : "GCC FAILED") << "\n";
+             log << "Execution is finished\n";
          } else {
              std::cout << "\n------Parser output is empty, " + name + "\n";
              return 1;

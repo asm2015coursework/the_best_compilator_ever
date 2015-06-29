@@ -1,0 +1,74 @@
+int write(int fd, char* buf, int count) {
+    asm {
+        mov rax, 1
+        mov rdi, qword[rbp + 16]
+        mov rsi, qword[rbp + 24]
+        mov rdx, qword[rbp + 32]
+        syscall
+    }
+    return;
+}
+
+int read(int fd, char* buf, int count) {
+    asm {
+        mov rax, 0
+        mov rdi, qword[rbp + 16]
+        mov rsi, qword[rbp + 24]
+        mov rdx, qword[rbp + 32]
+        syscall
+    }
+    return;
+}
+
+int min(int a, int b){
+    if (a > b)
+        return a;
+    return b;
+}
+
+void z_function (char *s, int len, int* z) {
+    int a[100];
+    int n = len;
+    int l = 0;
+    int r = 0;
+    a[0] = 0;
+    char s2[100];
+    for (int i = 0; i < len; i = i + 1)
+        s2[i] = *(s + i);
+
+    for (int i = 1; i < n; i = i + 1) {
+        if (i <= r)
+            a[i] = min (r - i + 1, a[i - l]);
+
+        while (i + a[i] < n & s2[a[i]] == s2[i + a[i]]){
+            a[i] = a[i] + 1;
+        }
+        if (i + a[i] - 1 > r) {
+            l = i;
+            r = i + a[i] - 1;
+        }
+    }
+    for (int i = 0; i < len; i = i + 1)
+        *(z + i) = a[i];
+    return;
+}
+
+int my_read_str(char *s, int len){
+     // TODO include my lib? (bufio.cmm)
+    // decline_input(STDIN_FILENO); return read_str(s, len);
+    return read(STDIN_FILENO, s, len);
+}
+
+
+int main() {
+
+    char *s;
+    int SIZE_N = 7;
+    int z[1000];
+    int len = my_read_str(s, SIZE_N);
+    z_function(s, len, z);
+
+    write(STDOUT_FILENO, z, len);
+
+    return 0;
+}

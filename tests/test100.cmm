@@ -1,0 +1,75 @@
+void sort(int *a, int l, int r){
+    if (l >= r)
+        return;
+    int x = a[(l + r) / 2];
+    int i = l;
+    int j = r;
+    while (i <= j){
+        while (a[i] < x)
+            i = i + 1;
+        while (a[j] > x)
+            j = j - 1;
+        if (i <= j) {
+            swap(&a[i], &a[j]);
+            i = i + 1;
+            j = j - 1;
+        }
+    }
+
+    if (i < r)
+        sort(a, i, r);
+    if (l < j)
+        sort(a, l, j);
+}
+
+int write(int fd, char* buf, int count) {
+    asm {
+        mov rax, 1
+        mov rdi, qword[rbp + 16]
+        mov rsi, qword[rbp + 24]
+        mov rdx, qword[rbp + 32]
+        syscall
+    }
+    return;
+}
+
+int read(int fd, char* buf, int count) {
+    asm {
+        mov rax, 0
+        mov rdi, qword[rbp + 16]
+        mov rsi, qword[rbp + 24]
+        mov rdx, qword[rbp + 32]
+        syscall
+    }
+    return;
+}
+
+void read_array(char *a, int len){
+    //for (int i = 0; i < len; i = i + 1)        read(0, a[i], 1);
+    read(0, a, len);
+}
+
+void write_array(char *a, int len){
+    //for (int i = 0; i < len; i = i + 1)        write(1, a[i], 1);
+    write(1, a, len);
+}
+
+void println(){
+    int ln = 10;
+    write(1, &ln, 1);
+}
+
+int main(){
+    int SIZE_N = 5;
+    char a[5];
+
+    read_array(a, SIZE_N);
+
+    //sort(a, 0, SIZE_N - 1);
+
+    write_array(a, SIZE_N);
+
+    println();
+
+    return 0;
+}

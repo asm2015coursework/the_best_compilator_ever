@@ -1,0 +1,66 @@
+#include<io>
+
+void swap(int* a, int* b){
+    int t = *a;
+    *a = *b;
+    *b = t;
+}
+
+int b[1000];
+int a[100];
+
+void sort(int l, int r) {
+    if (l >= r){
+        return;
+    }
+
+    int m = (l + r) / 2;
+    sort(l, m);
+    sort(m + 1, r);
+
+    int i = l;
+    int j = m + 1;
+
+    int uk = l;
+    while (i <= m && j <= r)
+        if (a[i] < a[j]){
+            b[uk] = a[i];
+            i = i + 1;
+        } else {
+            b[uk] = a[j];
+            j = j + 1;
+        }
+
+    for (int k = i; k <= m; k = k + 1) {
+        b[uk] = a[k];
+        uk = uk + 1;
+    }
+    for (k = j; j <= r; k = k + 1){
+        b[uk] = a[k];
+        uk = uk + 1;
+    }
+    for (i = l; i <= r; i = i + 1)
+        a[i] = b[i];
+}
+
+
+void read_array(int len){
+    for (int i = 0; i < len; i = i + 1)
+        a[i] = read_num(0);
+}
+
+void write_array(int len){
+    for (int i = 0; i < len; i = i + 1)
+        write_num(1, a[i]);
+}
+
+int main(){
+    int SIZE_N = 5;
+    read_array(SIZE_N);
+
+    sort(0, SIZE_N - 1);
+
+    write_array(SIZE_N);
+
+    return 0;
+}
