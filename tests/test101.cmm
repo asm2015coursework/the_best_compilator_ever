@@ -6,61 +6,60 @@ void swap(int* a, int* b){
     *b = t;
 }
 
-int b[1000];
-int a[100];
-
-void sort(int l, int r) {
+void sort(int l, int r, int* a, int* b) {
     if (l >= r){
         return;
     }
 
     int m = (l + r) / 2;
-    sort(l, m);
-    sort(m + 1, r);
+    sort(l, m, a, b);
+    sort(m + 1, r, a, b);
 
     int i = l;
     int j = m + 1;
 
     int uk = l;
-    while (i <= m && j <= r)
-        if (a[i] < a[j]){
-            b[uk] = a[i];
+    while (i <= m & j <= r) {
+        if (*(a + i * 8) < *(a + j * 8)) {
+           *(b + uk * 8) = *(a + i * 8);
             i = i + 1;
         } else {
-            b[uk] = a[j];
+            *(b + uk * 8) = *(a + j * 8);
             j = j + 1;
         }
-
-    for (int k = i; k <= m; k = k + 1) {
-        b[uk] = a[k];
+    }
+    int k;
+    for (k = i; k <= m; k = k + 1) {
+        *(b + uk * 8) = *(a + k * 8);
         uk = uk + 1;
     }
     for (k = j; j <= r; k = k + 1){
-        b[uk] = a[k];
+        *(b + uk * 8) = *(a + k * 8);
         uk = uk + 1;
     }
     for (i = l; i <= r; i = i + 1)
-        a[i] = b[i];
+        *(a + i * 8) = *(b + i * 8);
 }
 
 
-void read_array(int len){
+void read_array(int len, int* a){
     for (int i = 0; i < len; i = i + 1)
-        a[i] = read_num(0);
+        *(a + i * 8) = read_num(0);
 }
 
-void write_array(int len){
+void write_array(int len, int* a){
     for (int i = 0; i < len; i = i + 1)
-        write_num(1, a[i]);
+        write_num(1, *(a + i * 8));
 }
 
 int main(){
+    int a[1000];
+    int b[100];
     int SIZE_N = 5;
-    read_array(SIZE_N);
+    read_array(SIZE_N, a);
+    sort(0, SIZE_N - 1, a, b);
 
-    sort(0, SIZE_N - 1);
-
-    write_array(SIZE_N);
+    //write_array(SIZE_N, a);
 
     return 0;
 }
