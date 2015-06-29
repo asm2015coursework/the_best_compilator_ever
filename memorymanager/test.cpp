@@ -9,6 +9,7 @@ void test1() {
 	int* b = (int*) a;
 	*b = -1;
 	printf("%d\n", *b);
+	printf("\n");
 }
 
 void test2() {
@@ -37,6 +38,7 @@ void test2() {
 	cmm_free(c1);
 	a = cmm_malloc(700);
 	printf("%lld\n", a);
+	printf("\n");
 }
 
 void test3() {
@@ -51,6 +53,7 @@ void test3() {
 	printf("%lld\n", a);
 	a = cmm_malloc(700);
 	printf("%lld\n", a);
+	printf("\n");
 }
 
 void test4() {
@@ -66,6 +69,7 @@ void test4() {
 	printf("%lld\n", b);
 	cmm_free(a);
 	cmm_free(b);
+	printf("\n");
 }
 
 
@@ -87,6 +91,7 @@ void test5() {
 	printf("%lld\n", b);
 	cmm_free(a);
 	cmm_free(b);
+	printf("\n");
 }
 
 void test6() {
