@@ -15,13 +15,14 @@ void sort(int l, int r){
     int x = *(a + m * 8);
     int i = l;
     int j = r;
+    int t;
     while (i <= j){
         while (i <= r & (*(a + i * 8) < x))
             i = i + 1;
         while (j >= l & (*(a + j * 8) > x))
             j = j - 1;
         if (i <= j) {
-            int t = *(a + i * 8);
+            t = *(a + i * 8);
             *(a + i * 8) = *(a + j * 8);
             *(a + j * 8) = t;
             i = i + 1;
@@ -61,13 +62,14 @@ void println(){
 }
 
 int main(){
-    int SIZE_N = 4;
+    int SIZE_N = 5;
 
-    read_array(SIZE_N);
+    int n = read_num(0);
+    read_array(n);
 
-    sort(0, SIZE_N - 1);
+    sort(0, n - 1);
 
-    write_array(SIZE_N);
+    write_array(n);
 
     println();
 

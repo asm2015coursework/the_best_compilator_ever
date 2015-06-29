@@ -15,13 +15,15 @@ void sort(int l, int r) {
     }
 
     int m = (l + r) / 2;
-    sort(l, m);
-    sort(m + 1, r);
-
     int i = l;
     int j = m + 1;
 
     int uk = l;
+    int k;
+    sort(l, m);
+    sort(m + 1, r);
+
+
     while (i <= m && j <= r)
         if (*(a + i * 8) < *(a + j * 8)){
             *(b + uk * 8) = *(a + i * 8);
@@ -31,7 +33,7 @@ void sort(int l, int r) {
             j = j + 1;
         }
 
-    for (int k = i; k <= m; k = k + 1) {
+    for (k = i; k <= m; k = k + 1) {
         *(b + uk * 8) = *(a + k * 8);
         uk = uk + 1;
     }
