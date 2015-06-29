@@ -1,0 +1,8 @@
+======TESTING::../the_best_compilator_ever/tests/test100
+
+---TOKENS:KEY : WithoutTokens
+Output is not empty
+-----EXECUTION
+YASM OK
+GCC OK
+Execution is finished

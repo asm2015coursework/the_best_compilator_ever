@@ -1,0 +1,42 @@
+#include<io>
+
+void print_sp(){
+    int sp = 32;
+    write(1, &sp, 1);
+}
+
+void println(){
+    int ln = 10;
+    write(1, &ln, 1);
+}
+
+int main(){
+
+    int a[1000];
+    int n = read_num(0);
+    int i;
+    int j;
+    int t;
+
+    for (i = 0; i < n; i = i + 1)
+        *(a + i * 8) = read_num(0);
+
+    for (i = 0; i < n; i = i + 1){
+        for (j = 0; j + 1 < n; j = j + 1){
+            if (*(a + j * 8) > *(a + (j + 1) * 8)){
+                t = *(a + j * 8);
+                *(a + j * 8) = *(a + (j + 1) * 8);
+                *(a + (j + 1) * 8) = t;
+            }
+        }
+    }
+
+    for (i = 0; i < n; i = i + 1){
+        write_num(1, *(a + i * 8));
+        print_sp();
+    }
+
+    println();
+
+    return 0;
+}

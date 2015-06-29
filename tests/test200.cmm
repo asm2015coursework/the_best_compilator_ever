@@ -1,24 +1,4 @@
-int write(int fd, char* buf, int count) {
-    asm {
-        mov rax, 1
-        mov rdi, qword[rbp + 16]
-        mov rsi, qword[rbp + 24]
-        mov rdx, qword[rbp + 32]
-        syscall
-    }
-    return;
-}
-
-int read(int fd, char* buf, int count) {
-    asm {
-        mov rax, 0
-        mov rdi, qword[rbp + 16]
-        mov rsi, qword[rbp + 24]
-        mov rdx, qword[rbp + 32]
-        syscall
-    }
-    return;
-}
+#include <io>
 
 int read_str(char *s, int len){
     return read(0, s, len);
@@ -42,7 +22,7 @@ void prefix_function (char* s, int len, int* pi) {
     char s2[100];
     for (int i = 0; i < len; i = i + 1)
         s2[i] = *(s + i);
-    for (int i = 1; i < n; i = i + 1) {
+    for (i = 1; i < n; i = i + 1) {
             int j = res[i - 1];
             while (j > 0 & s2[i] != s2[j])
                     j = res[j - 1];
@@ -50,28 +30,22 @@ void prefix_function (char* s, int len, int* pi) {
                 j = j + 1;
             res[i] = j;
     }
-    for (int i = 0; i < n; i = i + 1)
+    for (i = 0; i < n; i = i + 1)
         *(pi + i) = res[i];
     return;
 }
 
-/*
 void copy_str(char *dest, int shift, char* t, int len){
     for (int i = 0; i < len; i = i + 1)
-       dest[shift + i] = t[i];
+      *(dest + shift + i) = *(t + i);
 }
 
-void print_int(int a){
-
-}
-*/
-/*
 int kmp(char* t, int len_t, char* s, int len_s, int* res){
     int pi[1000];
     char a[1000];
-    copy_str(a, 0, t, let_t);
+    copy_str(a, 0, t, len_t);
     a[len_t] = 0;
-    copy_str(a, lent_t + 1, s, len_s);
+    copy_str(a, len_t + 1, s, len_s);
     int len = len_t + 1 + len_s;
 
     prefix_function(a, len, pi);
@@ -84,30 +58,31 @@ int kmp(char* t, int len_t, char* s, int len_s, int* res){
             val[c] = i - len_t - 1;
             c = c + 1;
         }
-    for (int i = 0; i < c; i = i + 1)
+    for (i = 0; i < c; i = i + 1)
        *(res + i) = val[i];
     return c;
 }
-*/
-void print_one(){
-    int one = 49;
-    write(1, &one, 1);
+
+void print_str(char *s, int len){
+    write(1, s, len);
 }
 
 int main(){
     char* t;
     int len_t = read_str(t, 3);
+    print_str(t, 3);
+    return 0;
     char* s;
+
     int len_s = read_str(s, 7);
     int res[1000];
     int ans = 0;
-        //kmp(t, len_t, s, len_s, res);
+    kmp(t, len_t, s, len_s, res);
 
-    //print_int(ans);
+    write_num(1, ans);
     println();
     for (int i = 0; i < ans; i = i + 1) {
-        //print_int(res[i]);
-        print_one();
+        write_num(1, res[i]);
         print_sp();
     }
     println();
