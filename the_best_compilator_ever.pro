@@ -118,22 +118,3 @@ HEADERS += \
     Struct.h \
     Type.h \
     Globals.h
-
-OTHER_FILES += \
-    tests/test0.cmm \
-    tests/test1.cmm \
-    parser/ReadMe \
-    tester/README \
-    tests/test2.cmm \
-    tests/test3.cmm \
-    tester/log.txt \
-    tests/test01.cmm \
-    tests/test02.cmm \
-    tests/test03.cmm \
-    memorymanager/data.asm \
-    memorymanager/head.asm \
-    memorymanager/text.asm \
-    tests/test0.asm \
-    tests/test1.asm \
-    tests/test2.asm \
-    tests/test3.asm
