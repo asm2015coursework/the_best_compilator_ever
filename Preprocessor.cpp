@@ -81,35 +81,34 @@ string Preprocessor::applyIncludes(string code, string filePath, string specialD
     const string format = ".cmm";
     string resultCode(code);
     string::size_type includePositionBegin = code.find(includePointer, 0);
-    string::size_type includePosition, shift = 0;
-    while (includePositionBegin != code.npos) {
-        includePosition = includePositionBegin + includePointer.length();
-        while (code[includePosition] == ' ') {
-            includePosition++;
-        }
-        if (!this->inBrackets(code, includePositionBegin)) {
-            if (code[includePosition] == '<') {
+    string::size_type includePosition;
+    while (includePositionBegin != resultCode.npos) {
+        includePosition = resultCode.find(' ', includePositionBegin) + 1;
+        if (!this->inBrackets(resultCode, includePositionBegin)) {
+            if (resultCode[includePosition] == '<') {
                 includePosition++;
-                string::size_type fileNameEndPosition = code.find('>', includePosition);
-                string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
+                string::size_type fileNameEndPosition = resultCode.find('>', includePosition);
+                string fileName = resultCode.substr(includePosition, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(specialDirectory + fileName + format);
                 if (fileSource == "") {
                     println("No file in directory:" + fileName + " in " + specialDirectory);
                 }
-                string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
-                resultCode.replace(includePositionBegin + shift, replaceSizeCount, fileSource);
-                shift += replaceSizeCount + fileSource.length();
-            } else if (code[includePosition] == '"'){
+                string::size_type replaceSizeCount = fileNameEndPosition - includePositionBegin + 1;
+                resultCode.replace(includePositionBegin, replaceSizeCount, fileSource);
+            } else if (resultCode[includePosition] == '"'){
                 includePosition++;
-                string::size_type fileNameEndPosition = code.find('"', includePosition);
-                string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
+                string::size_type fileNameEndPosition = resultCode.find('"', includePosition);
+                string fileName = resultCode.substr(includePosition, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(filePath + fileName, filePath + fileName.substr(0, fileName.find_last_of('/')), specialDirectory);
-                string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
-                resultCode.replace(includePositionBegin + shift, replaceSizeCount, fileSource);
-                shift += replaceSizeCount + fileSource.length();
+                if (fileSource == "") {
+                    println("No file in directory:" + fileName + " in " + specialDirectory);
+                }
+                string::size_type replaceSizeCount = fileNameEndPosition - includePositionBegin + 1;
+                resultCode.replace(includePositionBegin, replaceSizeCount, fileSource);
             }
         }
-        includePositionBegin = code.find(includePointer, includePosition);
+        includePositionBegin = resultCode.find(includePointer, includePosition);
+
     }
     return resultCode;
 }
