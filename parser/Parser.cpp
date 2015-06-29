@@ -663,7 +663,7 @@ pair<Token*, size_t> Parser::constIntParse(size_t x) {
 
 pair<Token*, size_t> Parser::constStringParse(size_t x) {
     x++;
-    while (x < str.length() && isspace(str[x])) x++;
+    //while (x < str.length() && isspace(str[x])) x++;
     string f = "";
     while (x < str.length() && str[x] != '"') {
         f += str[x];

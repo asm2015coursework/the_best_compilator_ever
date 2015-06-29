@@ -8,20 +8,21 @@ void swap(int* x, int* y){
     *y = t;
 }
 
-void sort(int l, int r){
+void qsort(int l, int r, int* a){
     if (l >= r)
         return;
     int m = (l + r) / 2;
     int x = *(a + m * 8);
     int i = l;
     int j = r;
+    int t;
     while (i <= j){
-        while (*(a + i * 8) < x)
+        while (i <= r & (*(a + i * 8) < x))
             i = i + 1;
-        while (*(a + j * 8) > x)
+        while (j >= l & (*(a + j * 8) > x))
             j = j - 1;
         if (i <= j) {
-            int t = *(a + i * 8);
+            t = *(a + i * 8);
             *(a + i * 8) = *(a + j * 8);
             *(a + j * 8) = t;
             i = i + 1;
@@ -30,38 +31,40 @@ void sort(int l, int r){
     }
 
     if (i < r)
-        sort(i, r);
+        qsort(i, r, a);
     if (l < j)
-        sort(l, j);
+        qsort(l, j, a);
     return;
 }
 
-
-void read_array(int len){
-    for (int i = 0; i < len; i = i + 1)
-        *(a + i * 8) = read_num(0);
+void bubblesort(int* a, int n) {
+    int i;
+    int j;
+    int t;
+    for (i = 0; i < n - 1; i = i + 1) {
+        for (j = 0; j < n - i - 1; j = j + 1) {
+            if (*(a + j * 8) > *(a + j * 8 + 8)) {
+                t = *(a + j * 8 + 8);
+                *(a + j * 8 + 8) = *(a + j * 8);
+                *(a + j * 8) = t;
+            }
+        }
+    }
 }
 
-void write_array(int len){
-    for (int i = 0; i < len; i = i + 1)
-        write_num(1, *(a + i * 8));
-}
 
-void println(){
-    int ln = 10;
-    write(1, &ln, 1);
-}
 
 int main(){
-    int SIZE_N = 5;
-
-    read_array(SIZE_N);
-
-    sort(0, SIZE_N - 1);
-
-    write_array(SIZE_N);
-
-    println();
-
+    int n = read_num(0);
+    int i;
+    int* a = malloc(n * 8);
+    for (i = 0; i < n; i = i + 1) {
+        *(a + i * 8) = read_num(0);
+    }
+    bubblesort(a, n);
+    for (i = 0; i < n; i = i + 1) {
+        write_num(1, *(a + i * 8));
+        write(1, " ", 1);
+    }
     return 0;
 }

@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     Preprocessor preproc;
 
     preproc.setIncludeDirectory("");
-    string TEST = "test02";
+    string TEST = "test100";
     preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm","", "../the_best_compilator_ever/cmmlibs/");
     vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm"));
     string output = CodeGenerator::generate(tokens);
