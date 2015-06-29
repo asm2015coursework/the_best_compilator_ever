@@ -12,18 +12,18 @@ void sort(int l, int r){
     if (l >= r)
         return;
     int m = (l + r) / 2;
-    int x = a[m];
+    int x = *(a + m * 8);
     int i = l;
     int j = r;
     while (i <= j){
-        while (a[i] < x)
+        while (i <= r & (*(a + i * 8) < x))
             i = i + 1;
-        while (a[j] > x)
+        while (j >= l & (*(a + j * 8) > x))
             j = j - 1;
         if (i <= j) {
-            int t = a[i];
-            a[i] = a[j];
-            a[j] = t;
+            int t = *(a + i * 8);
+            *(a + i * 8) = *(a + j * 8);
+            *(a + j * 8) = t;
             i = i + 1;
             j = j - 1;
         }
@@ -39,12 +39,20 @@ void sort(int l, int r){
 
 void read_array(int len){
     for (int i = 0; i < len; i = i + 1)
-        a[i] = read_num(0);
+        *(a + i * 8) = read_num(0);
+}
+
+
+void print_sp(){
+    int sp = 32;
+    write(1, &sp, 1);
 }
 
 void write_array(int len){
-    for (int i = 0; i < len; i = i + 1)
-        write_num(1, a[i]);
+    for (int i = 0; i < len; i = i + 1){
+        write_num(1, *(a + i * 8));
+        print_sp();
+    }
 }
 
 void println(){
@@ -53,7 +61,7 @@ void println(){
 }
 
 int main(){
-    int SIZE_N = 5;
+    int SIZE_N = 4;
 
     read_array(SIZE_N);
 
