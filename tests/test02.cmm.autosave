@@ -2,8 +2,7 @@
 
 
 int main() {
-    int* s = malloc(16);
-    free(s);
+    
     int n = read_num(0);
     int* a = malloc(n * 8);
     int i;

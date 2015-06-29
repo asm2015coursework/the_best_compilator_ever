@@ -34,6 +34,9 @@ int read_num(int fd) {
 }
 
 void write_num(int fd, int num) {
+    if (num == 0) {
+        write(fd, "0", 1);
+    }
     if (num < 0) {
         write(fd, "-", 1);
         num = -num;
