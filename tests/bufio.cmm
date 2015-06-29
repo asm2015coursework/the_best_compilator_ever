@@ -1,4 +1,6 @@
+#include <unistd.h>
 
+// INCLUDE CMM_MALLOC
 
 #define fd_t int
 #define size_t int
@@ -141,7 +143,7 @@ struct Lib {
         }
     }
 
-    buf_t *buf;
+    buf_t* buf;
     fd_t fd;
 
     int decline_input(fd_t r_fd){
@@ -225,9 +227,4 @@ struct Lib {
             s[j] = res[j];
         return uk;
     }
-}
-
-
-int main() {
-    return 0;
 }

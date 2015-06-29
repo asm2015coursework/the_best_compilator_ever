@@ -117,4 +117,22 @@ HEADERS += \
     tokens/GreaterEqualityToken.h \
     Struct.h \
     Type.h \
-    Globals.h
+    Globals.h \
+    tests/bufio.cmm \
+    tests/test02.cmm
+
+OTHER_FILES += \
+    tests/test0.cmm \
+    tests/test1.cmm \
+    tests/test01.cmm \
+    tests/test2.cmm \
+    tests/test3.cmm \
+    tests/test03.cmm \
+    tests/test4.cmm \
+    tests/test11.cmm \
+    tests/test12.cmm \
+    tests/test13.cmm \
+    tests/test100.cmm \
+    tests/test101.cmm \
+    tests/test200.cmm
+
