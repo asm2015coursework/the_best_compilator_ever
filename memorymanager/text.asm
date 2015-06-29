@@ -1,61 +1,3 @@
-global cmm_malloc
-global cmm_free
-
-%define sys_brk               12
-%define chunk_info            21
-%define NULL                  0
-%define free_chunk            byte  0
-%define filled_chunk          byte  1
-
-%macro set_free 1
-    mov [%1 + 16], free_chunk
-%endmacro
-
-%macro set_filled 1
-    mov [%1 + 16], filled_chunk
-%endmacro
-
-%macro get_state 2
-    mov %2, [%1 + 16]
-%endmacro
-
-%macro set_len 2
-    mov [%1 + 17], %2
-%endmacro
-
-%macro set_prev 2
-    mov [%1], %2
-%endmacro
-
-%macro set_next 2
-    mov [%1 + 8], %2
-%endmacro
-
-%macro get_len 2
-    mov %2, [%1 + 17]
-%endmacro
-
-%macro get_prev 2
-    mov %2, [%1]
-%endmacro
-
-%macro get_next 2
-    mov %2, [%1 + 8]
-%endmacro
-
-
-section .data
-initial_break:          dq  0
-current_break:          dq  0
-first_chunk:            dq  0
-last_chunk:             dq  0
-init:                   db  0
-
-;chunk:   |pointer to previous chunk|pointer to next chunk|filled/free|length of chunk| data |
-;         |        8 bytes          |        8 bytes      |  1 byte   |    4 bytes    |      |
-
-section .text
-
 init_cmm_heap:
     mov rax, sys_brk
     mov rdi, 0
@@ -337,4 +279,3 @@ allocate_new_chunk:
 
 .exit
     ret
-

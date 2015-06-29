@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <wait.h>
 
-
 #include "../tokens/Token.h"
 #include "../Preprocessor.h"
 #include "../parser/Parser.h"
@@ -49,9 +48,17 @@ int Tester::test(string name, bool withoutTokens) {
                 log << (exec("yasm -felf64 -dgwarf2 "+ name + ".asm -o  "+ name + ".o")) << "\n";
                 return 1;
              } else {
-                 int status=0;
+                 int status = 0;
                  wait(&status);
-                 log << (exec("gcc "+ name + ".o -o " + name)) << "\n";
+                 int f2 = fork();
+                 if (f2 == 0){
+                    log << (exec("gcc "+ name + ".o -o " + name)) << "\n";
+                    return 1;
+                 } else {
+                     int status2 = 0;
+                     wait(&status2);
+                     log << "Execution is finished\n";
+                 }
              }
              log << "\n";
 
@@ -59,7 +66,7 @@ int Tester::test(string name, bool withoutTokens) {
              std::cout << "\n------Parser output is empty, " + name + "\n";
              return 1;
          }
-    }  catch (ParsingException& ignored){
+    }  catch (ParsingException& ignored) {
         std::cout << "\n------Exception " + std::string(ignored.what()) + "\n";
         return 1;
     }
@@ -71,7 +78,7 @@ void Tester::remove_log(){
     remove ("../the_best_compilator_ever/tester/log.txt");
 }
 
-int Tester::run_tests(int* a, bool withoutTokens){
+int Tester::run_tests(int* a, bool withoutTokens) {
     int failed = 0;
     Tester::remove_log();
     for (int i = 0; i < sizeof(a); ++i){
@@ -80,12 +87,12 @@ int Tester::run_tests(int* a, bool withoutTokens){
     return failed;
 }
 
-int Tester::run_one(string name, bool withoutTokens){
+int Tester::run_one(string name, bool withoutTokens) {
     Tester::remove_log();
     return Tester::test("../the_best_compilator_ever/tests/" + name, withoutTokens);
 }
 
-int Tester::run_all(bool withoutTokens){
+int Tester::run_all(bool withoutTokens) {
     int failed = 0;
     Tester::remove_log();
     for (int i = 0; i < 4 ; ++i){

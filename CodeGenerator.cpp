@@ -56,6 +56,9 @@ CodeGenerator::CodeGenerator() {
     cycle_count = 0;
     cpy_count = 0;
     structs.clear();
+    functions.insert(make_pair("malloc", Type("char*")));
+    functions.insert(make_pair("free", Type("char*")));
+    //fileToString("../the_best_compilator")
 }
 
 void CodeGenerator::append(const string& s) {
@@ -574,7 +577,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
     else if (token->left->getType() == "StructVariable") {
         type_err("ask artur to do a.a = bla");
     }
-    type_err("handleAssignment: wrong left token");
+    type_err("handleAssignment: wrong left token" + token->left->getType() + " " + token->left->toString());
 }
 
 void CodeGenerator::handleBlock(BlockToken* token) {

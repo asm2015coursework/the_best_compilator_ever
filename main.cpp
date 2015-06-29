@@ -33,9 +33,10 @@ int main(int argc, char *argv[]) {
 */
     Parser parser;
     Preprocessor preproc;
-    preproc.setIncludeDirectory("../the_best_compilator_ever/cmmlibs/");
-    string TEST = "test02";
 
+    preproc.setIncludeDirectory("");
+    string TEST = "test02";
+    preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm","", "../the_best_compilator_ever/cmmlibs/");
     vector<Token*> tokens = parser.parse(preproc.preprocess("../the_best_compilator_ever/tests/" + TEST +".cmm"));
     string output = CodeGenerator::generate(tokens);
     //for (size_t i = 0; i < tokens.size(); i++) {

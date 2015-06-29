@@ -15,25 +15,21 @@ int Preprocessor::setIncludeDirectory(string includeDirectory) {
 
 string Preprocessor::preprocess(string file_name) {
     string resultCode = fileToString(file_name);
-    if (resultCode == "") {
-        println("No such file:" + file_name);
-    }
     Preprocessor preprocessor = Preprocessor();
     resultCode = preprocessor.deleteComments(resultCode);
     resultCode = preprocessor.applyDefines(resultCode);
-    resultCode = preprocessor.applyIncludes(resultCode, "");
+    resultCode = preprocessor.applyIncludes(resultCode, "", includeDirectory);
     return resultCode;
 }
 
-string Preprocessor::preprocess(string file_name, string filePath) {
+string Preprocessor::preprocess(string file_name, string filePath, string includeDirectory) {
+    this->includeDirectory = includeDirectory;
+    println(this->includeDirectory);
     string resultCode = fileToString(file_name);
-    if (resultCode == "") {
-        println("No such file:" + file_name);
-    }
     Preprocessor preprocessor = Preprocessor();
     resultCode =  preprocessor.deleteComments(resultCode);
     resultCode = preprocessor.applyDefines(resultCode);
-    resultCode = preprocessor.applyIncludes(resultCode, filePath);
+    resultCode = preprocessor.applyIncludes(resultCode, filePath, includeDirectory);
     return resultCode;
 }
 
@@ -41,7 +37,7 @@ string Preprocessor::applyDefines(string code) {
     const string definePointer = "#define";
     string resultCode(code);
     string::size_type definePositionBegin = code.find(definePointer, 0);
-    string::size_type definePosition, shift = 0;
+    string::size_type definePosition;
     while (definePositionBegin != code.npos) {
         definePosition = definePositionBegin + definePointer.length();
         while (code[definePosition] == ' ') {
@@ -64,9 +60,8 @@ string Preprocessor::applyDefines(string code) {
 }
 
 
-string Preprocessor::applyIncludes(string code, string filePath) {
+string Preprocessor::applyIncludes(string code, string filePath, string specialDirectory) {
     const string includePointer = "#include";
-    const string specialDirectory = this->includeDirectory;
     const string format = ".cmm";
     string resultCode(code);
     string::size_type includePositionBegin = code.find(includePointer, 0);
@@ -82,6 +77,9 @@ string Preprocessor::applyIncludes(string code, string filePath) {
                 string::size_type fileNameEndPosition = code.find('>', includePosition);
                 string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
                 string fileSource = this->preprocess(specialDirectory + fileName + format);
+                if (fileSource == "") {
+                    println("No file in directory:" + fileName + " in " + specialDirectory);
+                }
                 string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
                 resultCode.replace(includePositionBegin + shift, replaceSizeCount, fileSource);
                 shift += replaceSizeCount + fileSource.length();
@@ -89,7 +87,7 @@ string Preprocessor::applyIncludes(string code, string filePath) {
                 includePosition++;
                 string::size_type fileNameEndPosition = code.find('"', includePosition);
                 string fileName = code.substr(includePosition, fileNameEndPosition - includePosition);
-                string fileSource = this->preprocess(filePath + fileName, filePath + fileName.substr(0, fileName.find_last_of('/')));
+                string fileSource = this->preprocess(filePath + fileName, filePath + fileName.substr(0, fileName.find_last_of('/')), specialDirectory);
                 string::size_type replaceSizeCount = includePosition - includePositionBegin + fileName.length() + 2;
                 resultCode.replace(includePositionBegin + shift, replaceSizeCount, fileSource);
                 shift += replaceSizeCount + fileSource.length();
