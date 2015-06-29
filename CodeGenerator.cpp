@@ -58,7 +58,10 @@ CodeGenerator::CodeGenerator() {
     structs.clear();
     functions.insert(make_pair("malloc", Type("char*")));
     functions.insert(make_pair("free", Type("char*")));
-    //fileToString("../the_best_compilator")
+    string mm_path = "../the_best_compilator/memorymanager/";
+    string mm_head = fileToString(mm_path + "head.asm");
+    string mm_data = fileToString(mm_path + "data.asm");
+    string mm_text = fileToString(mm_path + "text.asm");
 }
 
 void CodeGenerator::append(const string& s) {
