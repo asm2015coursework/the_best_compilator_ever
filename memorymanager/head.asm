@@ -1,5 +1,5 @@
-global cmm_malloc
-global cmm_free
+;global malloc
+;global free
 
 %define sys_brk               12
 %define chunk_info            21
@@ -42,3 +42,4 @@ global cmm_free
 %macro get_next 2
     mov %2, [%1 + 8]
 %endmacro
+

@@ -58,10 +58,7 @@ CodeGenerator::CodeGenerator() {
     structs.clear();
     functions.insert(make_pair("malloc", Type("char*")));
     functions.insert(make_pair("free", Type("char*")));
-    string mm_path = "../the_best_compilator/memorymanager/";
-    string mm_head = fileToString(mm_path + "head.asm");
-    string mm_data = fileToString(mm_path + "data.asm");
-    string mm_text = fileToString(mm_path + "text.asm");
+
 }
 
 void CodeGenerator::append(const string& s) {
@@ -80,13 +77,21 @@ string CodeGenerator::generate(const vector<Token*>& tokens) {
 }
 
 void CodeGenerator::handleCode(const vector<Token*>& tokens) {
+    string mm_path = "../the_best_compilator_ever/memorymanager/";
+    string mm_head = fileToString(mm_path + "head.asm");
+    string mm_data = fileToString(mm_path + "data.asm");
+    string mm_text = fileToString(mm_path + "text.asm");
+
+    append(mm_head);
     append("global main");
     append("section .text");
+    append(mm_text);
     for (size_t i = 0; i < tokens.size() && !gotError; i++) {
         handleToken(tokens[i]);
     }
     makeGlobalVariables();
     makeStrings();
+    append(mm_data);
 }
 
 void CodeGenerator::handleToken(Token* token) {
@@ -387,7 +392,7 @@ Type CodeGenerator::handleArrayCall(ArrayCallToken* token) {
                     append("mov rax, qword[rax]");
                     return Type(type);
                 }
-                type_err("handleArrayCall: it's not an array");
+                type_err("handleArrayCall: it's not an array" + token->toString());
             }
         }
         if (globals.count(vtoken->_name) == 1) {
@@ -410,7 +415,46 @@ Type CodeGenerator::handleArrayCall(ArrayCallToken* token) {
         }
         type_err("handleArrayCall: Unknow variable: " + vtoken->_name);
     }
-    type_err("handleArrayCall: wrong token");
+    else if (token->name->getType() == "StructPtrVariable") {
+        StructPtrVariableToken* stoken = (StructPtrVariableToken*)(token->name);
+        Type index = handleTypeToken(token->expr);
+        append("push rax");
+        Type type = handleTypeToken(stoken->expr);
+        if (type.isPointer() == 0) {
+            type_err("handleArrayCall: handleStructPtrVariable: wrong expr");
+        }
+        type.dereference();
+        if (structs.count(type.name) == 0) {
+            type_err("handleArrayCall: handleStructPtrVariable: unknown struct: " + type.name + " " + token->toString());
+        }
+        if (structs[type.name].vars.count(stoken->name) == 0) {
+            type_err("handleArrayCall: handleStructPtrVariable: unknown struct member");
+        }
+        long long var_offset = -structs[type.name].vars[stoken->name].first;
+        type = structs[type.name].vars[stoken->name].second;
+        append("mov rdx, rax");
+        append("add rdx, " + offsetToString(var_offset));
+        append("pop rax");
+        append("add rdx, rax");
+        if (!type.isDefault()) {
+            append("mov rax, rdx");
+        } else if (type.size == 1) {
+            append("xor rax, rax");
+            append("mov al, byte[rdx]");
+        } else if (type.size == 2) {
+            append("xor rax, rax");
+            append("mov ax, word[rdx]");
+        } else if (type.size == 4) {
+            append("xor rax, rax");
+            append("mov eax, dword[rdx]");
+        } else if (type.size == 8) {
+            append("mov rax, qword[rdx]");
+        } else {
+            type_err("handleArrayCall: handleStructPtrVariable: wrong type");
+        }
+        return Type(type);
+    }
+    type_err("handleArrayCall: wrong token " + token->toString());
 }
 
 void CodeGenerator::handleAsm(AsmToken* token) {
@@ -501,7 +545,7 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
                         append("mov rax, rdx");
                         return Type(atype);
                     }
-                    type_err("handleAssignment: handleArrayCall: it's not an array");
+                    type_err("handleAssignment: handleArrayCall: it's not an array" + token->toString());
                 }
             }
             if (globals.count(vtoken->_name) == 1) {
@@ -529,7 +573,37 @@ Type CodeGenerator::handleAssignment(AssignmentToken* token) {
         }
     }
     else if (token->left->getType() == "Dereference") {
-        type_err("Ask artur to do a* = blablalba");
+        DereferenceToken* dtoken = (DereferenceToken*)(token->left);
+        append("push rax");
+        Type type = handleTypeToken(dtoken->expr);
+        if (type.isPointer() == 0) {
+            type_err("handleAssignment: handleDereference: in is not a pointer");
+        }
+        type.dereference();
+        if (res.name != type.name && type.setMax(type, res) == 0) {
+            type_err("handleAssignment: handleDereference: wrong types");
+        }
+        append("pop rsi");
+        if (!type.isDefault()) {
+            append("mov rdi, rax");
+            genCpy(type.size);
+        } else if (type.size == 1) {
+            append("mov rdx, rsi");
+            append("byte[rax], dl");
+            append("mov rax, rdx");
+        } else if (type.size == 2) {
+            append("mov rdx, rsi");
+            append("worg[rax], dx");
+            append("mov rax, rdx");
+        } else if (type.size == 4) {
+            append("mov rdx, rsi");
+            append("dword[rax], edx");
+            append("mov rax, rdx");
+        } else if (type.size == 8) {
+            append("qword[rax], rsi");
+            append("mov rax, rsi");
+        }
+        return type;
     }
     else if (token->left->getType() == "StructPtrVariable") {
         StructPtrVariableToken* stoken = (StructPtrVariableToken*)(token->left);
@@ -633,7 +707,7 @@ Type CodeGenerator::handleDereference(DereferenceToken* token) {
         append("mov rax, qword[rax]");
     }
     else {
-        type_err("handleDereference: wrong type");
+
     }
     l.dereference();
     return l;
@@ -717,7 +791,7 @@ Type CodeGenerator::handleFunctionCall(FunctionCallToken *token) {
     append("call " + token->name);
     append("add rsp, " + sizeToString(total_size));
     if (functions.count(token->name) == 0) {
-        type_err("handleFunctionCall: Unknown function " + token->name);
+        type_err("handleFunctionCall: Unknown function " + token->name + " " + token->toString());
     }
     return functions[token->name];
 }

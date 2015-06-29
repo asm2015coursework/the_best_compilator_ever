@@ -1,5 +1,24 @@
 
 
+    int decline_input(int r_fd){
+        fd = r_fd;
+        buf = buf_new(4096);
+        return read(fd, buf->buffer, 0);
+    }
+
+    int is_digit(char c){
+        return 48 <= 0 + c & 0 + c <= 57;
+    }
+
+    int is_space(char c){
+        return  0 + c == 32;
+    }
+
+    int is_ln(char c){
+        return 0 + c == 10;
+    }
+
+
     struct buf_t {
         int ptr;
         int capacity;
@@ -133,24 +152,6 @@
 
     buf_t *buf;
     int fd;
-
-    int decline_input(int r_fd){
-        fd = r_fd;
-        buf = buf_new(4096);
-        return read(fd, buf->buffer, 0);
-    }
-
-    int is_digit(char c){
-        return 48 <= c & c <= 57;
-    }
-
-    int is_space(char c){
-        return c == 32;
-    }
-
-    int is_ln(char c){
-        return c == 10;
-    }
 
     int read_int(int& a){
         int i = buf->ptr;

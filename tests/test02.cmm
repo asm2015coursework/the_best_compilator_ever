@@ -1,21 +1,19 @@
 #include <io>
 
+struct S{
+int a;
+char b;
+}
+
 int main() {
-    int i = 5;
-    while (1) {
-       if (i == 10) {
-            int j;
-            for (j = 0; j < 4; j = j + 1) {
-                if (j == 1)
-                    continue;
-                write(1, "f", 1);
-            }
-            break;
-       }
-       i = i + 1;
-    }
-    int endl = 10;
-    write(1, &endl, 1);
+
+    S* s = malloc(9);
+    S* p = malloc(9);
+    //s->a = 4;
+    //if (p->a == 4) {
+    //    write(1, "!", 1);
+    //}
+
     return 0;
 }
 

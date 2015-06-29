@@ -14,7 +14,7 @@ init_cmm_heap:
 ; rdi - number of bytes to allocate
 ; returns pointer to allocated memory
 ; allocates memory
-cmm_malloc:
+malloc:
     push rcx
     push r11
     push rdx
@@ -101,7 +101,7 @@ cmm_malloc:
 
 
 ;rdi - pointer to memory
-cmm_free:
+free:
     push rcx
     push r11
     push rdx

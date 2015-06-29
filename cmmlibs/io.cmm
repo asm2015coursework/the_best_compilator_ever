@@ -20,6 +20,19 @@ syscall
     return;
 }
 
+/*int is_digit(char c){
+    return 48 <= 0 + c & 0 + c <= 57;
+}
+
+int is_space(char c){
+    return 0 + c == 32;
+}
+
+int is_ln(char c){
+    return 0 + c == 10;
+}
+
+
 struct buf_t {
     int ptr;
     int capacity;
@@ -29,14 +42,14 @@ struct buf_t {
     buf_t* buf_new(int capacity){
         buf_t* result = malloc(24);
         if (!result)
-            return NULL;
+            return 0;
         result->ptr = 0;
         result->capacity = capacity;
         result->size = 0;
         result->buffer = malloc(capacity);
         if (!result->buffer) {
             free(result);
-            return NULL;
+            return 0;
         }
         return result;
     }
@@ -82,8 +95,10 @@ struct buf_t {
         while (flushed < required & flushed < buf->size & (wc = write(fd, buf->buffer, buf->size - flushed)) >= 0)
             flushed = flushed + wc;
         buf->size = buf->size - flushed;
-        for (int i = 0; i < buf->size; i = i + 1)
-            buf->buffer[i] = buf->buffer[i + flushed];
+        for (int i = 0; i < buf->size; i = i + 1) {
+            //buf->buffer[i] = buf->buffer[i + flushed];
+            *(buf->buffer + i) = buf->buffer[i + flushed];
+        }
         if (wc < 0)
             return -1;
         else
@@ -93,11 +108,13 @@ struct buf_t {
     int buf_getline(int fd, buf_t* buf, char* dest) {
         for (int i = 0; i < buf->size; i = i + 1)
             if (is_ln(buf->buffer[i])) {
-                for (int k = 0; k < i; k = k + 1)
-                    dest[k] = buf->buffer[k];
+                int k;
+                for (k = 0; k < i; k = k + 1){
+                    *(dest + k) = buf->buffer[k];
+                }
                 int j = 0;
-                for (int k = i + 1; k < buf->size; k = k + 1) {
-                    buf->buffer[j] = buf->buffer[k];
+                for (k = i + 1; k < buf->size; k = k + 1) {
+                    *(buf->buffer + j) = buf->buffer[k];
                     j = j + 1;
                 }
                 buf->size = buf->size - i;
@@ -114,11 +131,13 @@ struct buf_t {
             buf->size = buf->size + rc;
             for (int i = last; i < buf->size; i = i + 1)
                 if (is_ln(buf->buffer[i])) {
-                    for (int k = 0; k < i; k = k + 1)
-                        dest[k] = buf->buffer[k];
+                    int k;
+                    for (k = 0; k < i; k = k + 1) {
+                        *(dest + k) = buf->buffer[k];
+                    }
                     int j = 0;
-                    for (int k = i + 1; k < buf->size; k = k + 1){
-                        buf->buffer[j] = buf->buffer[k];
+                    for (k = i + 1; k < buf->size; k = k + 1){
+                        *(buf->buffer + j) = buf->buffer[k];
                         j = j + 1;
                     }
                     buf->size = buf->size - i;
@@ -136,11 +155,11 @@ struct buf_t {
                 if (wc <= 0)
                     return -1;
                 for (int j = 0; j < buf->capacity - wc; j = j + 1)
-                    buf->buffer[j] = buf->buffer[j + wc];
+                    *(buf->buffer + j) = buf->buffer[j + wc];
                 buf->size = buf->size - wc;
             }
             buf->size = buf->size + 1;
-            buf->buffer[buf->size - 1] = src[i];
+            *(buf->buffer + buf->size - 1) = *(src + i);
         }
         return len;
     }
@@ -160,17 +179,6 @@ int decline_input(int r_fd){
     return read(fd, buf->buffer, 0);
 }
 
-int is_digit(char c){
-    return 48 <= c & c <= 57;
-}
-
-int is_space(char c){
-    return c == 32;
-}
-
-int is_ln(char c){
-    return c == 10;
-}
 
 int read_int(int& a){
     int i = buf->ptr;
@@ -239,5 +247,5 @@ int read_str(char* s, int len){
     for (int j = 0; j < uk; j = j + 1)
         s[j] = res[j];
     return uk;
-}
+}*/
 

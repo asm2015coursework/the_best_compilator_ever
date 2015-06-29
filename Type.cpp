@@ -69,10 +69,10 @@ Type::Type() {
 }
 
 bool Type::setMax(const Type &a, const Type &b) {
-    if (!a.isDefault() || !a.isDefault()) {
-        return 0;
-    }
     if (a.isPointer() > 0 && b.isPointer() > 0) {
+        return 1;
+    }
+    if (!a.isDefault() || !a.isDefault()) {
         return 0;
     }
     if (a.isPointer() > 0) {
