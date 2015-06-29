@@ -1,24 +1,14 @@
 #include <stdio.h>
 #include <cstdlib>
+#include <assert.h>
 #include "manager.h"
 
 
 void test1() {
-	void *a = cmm_malloc(100);
-	printf("%lld\n", a);
-	void *b = cmm_malloc(100);
-	printf("%lld\n", b);
-	void *c = cmm_malloc(100);
-	printf("%lld\n", c);
-	void *d = cmm_malloc(100);
-	printf("%lld\n", d);
-	cmm_free(b);
-	printf("HERE\n");
-	cmm_free(c);
-	printf("HERE\n");
-	cmm_free(d);
-	void *e = cmm_malloc(222);
-	printf("%lld\n", e);
+	void* a = cmm_malloc(4);
+	int* b = (int*) a;
+	*b = -1;
+	printf("%d\n", *b);
 }
 
 void test2() {
@@ -116,9 +106,7 @@ void test6() {
 	cmm_free(b);
 	cmm_free(d);
 	for (int i = 0; i < 25000; i++) {
-		if (array[i] != i) {
-			printf("%s\n", "AAAAAA");
-		}
+		assert(array[i] == i);
 	}
 	printf("%s\n", "OK");
 }
